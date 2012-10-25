@@ -1,5 +1,8 @@
 package net.swiftkey.fourplay;
 
+import java.util.List;
+import java.util.ArrayList;
+
 /**
  * A Connect4 game board state.
  */
@@ -46,6 +49,36 @@ public class Board
         return row;
     }
 
+    public boolean inBounds(int x, int y) {
+        return (x >= 0) && (x < this.numCols)
+            && (y >= 0) && (y < this.numRows);
+    }
+
+    public int[] getDiagonal(int x, int y, int dx, int dy) {
+        List<Integer> diagonal = new ArrayList<Integer>();
+
+        int xpos = x, ypos = y;
+        while(inBounds(xpos, ypos)) {
+            diagonal.add(diagonal.size(), this.queryCell(xpos, ypos));
+            xpos += dx;
+            ypos += dy;
+        }
+
+        int xneg = (x - dx), yneg = (y - dy);
+        while(inBounds(xneg, yneg)) {
+            diagonal.add(0, this.queryCell(xneg, yneg));
+            xneg -= dx;
+            yneg -= dy;
+        }
+
+        int[] diag = new int[diagonal.size()];
+        for(int i = 0; i < diag.length; ++i) {
+            diag[i] = diagonal.get(i);
+        }
+
+        return diag;
+    }
+
     public Board withMove(int col) throws Exception {
         int[] newBoardState = (int[]) boardState.clone();
         int[] colPieces = getColumn(col);
@@ -64,6 +97,23 @@ public class Board
 
         newBoardState[(rowOffset * this.numCols) + col] = 1;
         return new Board(newBoardState, this.numRows, this.numCols);
+    }
+
+    static int winningPiece(int[] pieces, int winLength) {
+        int[] counters = {0, 0, 0};
+        for(int i = 0; i < pieces.length; ++i) {
+            int counterIndex = pieces[i] + 1;
+            int count = counters[counterIndex] + 1;
+            counters = new int[] {0, 0, 0};
+            counters[counterIndex] = count;
+
+            int token = counterIndex - 1;
+            if (count == winLength && token != 0) {
+                return token;
+            }
+        }
+
+        return 0;
     }
 
 }
