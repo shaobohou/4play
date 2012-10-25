@@ -5,11 +5,29 @@ package net.swiftkey.fourplay;
  */
 public class Board
 {
-    /**
-     * Construct a Connect4 board state from the serialised
-     * JSON form.
-     */
+    // Original Connect4 board dimensions
+    public static final int DEFAULT_ROWS = 6;
+    public static final int DEFAULT_COLS = 7;
+
+    private final int[] boardState;
+    private final int numRows;
+    private final int numCols;
+
     public Board(int[] pieces)
     {
+        this(pieces, DEFAULT_ROWS, DEFAULT_COLS);
     }
+
+    public Board(int[] pieces, int numRows, int numCols)
+    {
+        this.boardState = pieces;
+        this.numRows = numRows;
+        this.numCols = numCols;
+    }
+
+    public int queryCell(int x, int y) {
+        int offset = (x + (y * this.numCols));
+        return this.boardState[offset];
+    }
+
 }
