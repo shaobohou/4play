@@ -3,12 +3,15 @@
         <script src="//ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js"></script>
         <title>4play Client</title>
         <script>
-            var cols = 7;
-            var rows = 6;
+            var cols = 8;
+            var rows = 8;
             var radius = 30;
             var height = 700;
             var width = 600;
-            var playerID = -1;
+            var player1 = -1;
+            var player2 = -1;
+            var nextPlayer = -1;
+            var players = {};
             
             function drawEmptyBoard(){
                 var svg = '<svg id="svg" xmlns="http://www.w3.org/2000/svg" version="1.1">'
@@ -27,7 +30,6 @@
                 $(".circle").attr("fill", "white");
                 for(i=0;i<board.length;i++){
                     if(board[i] == 1){
-                        console.log("#circle" + i)
                         $("#circle" + i).attr("fill", "red");
                     }else if(board[i] == -1){
                         $("#circle" + i).attr("fill", "black");
@@ -39,25 +41,62 @@
                 var circle = evt.target;
                 var id = parseInt(circle["id"].replace("circle", ""));
                 var col = id % cols;
-                console.log($("#circle" + ((cols * (rows - 1)) + col)).attr("fill") == "white");
-                
-                if($("#circle" + ((rows * (cols - 1)) + col)).attr("fill") != "white"){
+                var color = $("#circle" + ((cols * (rows - 1)) + col)).attr("fill")
+                if(color != "white"){
                     console.log("Failed to make move");
                     return false;
                 }
+                
+                $.post("/move", {"id" : nextPlayer, "index" : col}, function () {
+                        if(nextPlayer == player1){
+                            nextPlayer = player2;
+                            poll(player2);
+                        } else{
+                            nextPlayer = player1;
+                            poll(player1);
+                        }
+                    })
+                return true;
             }
             
             function pollCallback(data){
-                renderBoardState(data["board"]);
+                if(data["state"] == "LOST"){
+                    $("#result").text(players[nextPlayer] + " WINS")
+                }
+                renderBoardState(data["board"]["state"]);
             }
             
-            function poll(){
-                $.get("/poll", {"id" : playerID}, pollCallback)
+            function poll(playerID){
+                $.getJSON("/poll", {"id" : playerID}, pollCallback)
             }
-    
+            
+            function whoisnext(){
+                $.getJSON("/poll",{"id" : player1}, function(data){
+                    if(data["state"] == "MOVE"){
+                        nextPlayer = player1;
+                        players[player2] = "RED";
+                        players[player1] = "BLACK";
+                    }else{
+                        nextPlayer = player2;
+                        players[player2] = "BLACK";
+                        players[player1] = "RED";
+                    }
+                });
+            }
+            
+            function getPlayers(){
+                $.getJSON("/new-game", function(data){player1 = data["id"]; whoisnext()});
+                $.getJSON("/new-game", function(data){player2 = data["id"]; whoisnext()}); 
+            }
+            
+            function init(){
+               drawEmptyBoard();
+               getPlayers()
+            }
     
         </script>
     </head>
-    <body onload="drawEmptyBoard()"> 
+    <body onload="init()">
+        <div id="result" style="position:absolute;font-size: 5em"></div>
     </body>
 </html>
