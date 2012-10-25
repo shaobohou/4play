@@ -16,31 +16,31 @@
   [player-id]
   (get @game-ids player-id))
 
-(defn create-game
+(defn create-game!
   [player1 player2]
   (let [game-id (inc (count @games))]
     (swap! game-ids #(assoc % player1 game-id))
     (swap! game-ids #(assoc % player2 game-id))
-    (let [new-game (if (first-to-play) 
+    (let [new-game (if (first-to-play?) 
                      {:board empty-board :player1 player1 :player2 player2 :whosnext player1}
                      {:board empty-board :player1 player1 :player2 player2 :whosnext player2})]
-      (swap! games #(assoc % game-id )))))
+      (swap! games #(assoc % game-id new-game)))))
 
-(defn add-player
+(defn add-player!
   [player-id]
   (if @waiting-player
     (do 
-      (create-game @waiting-player player-id)
-      (reset! @waiting-player nil))
+      (create-game! @waiting-player player-id)
+      (reset! waiting-player nil))
     (reset! waiting-player player-id)))
 
 (defn new-game
   "This is horribly un-thread-safe"
   [params]
   (let [player-id @player-ids]
-    (swap! players inc)
-    (add-player player-id)
-    {:player-id player-id}))
+    (swap! player-ids inc)
+    (add-player! player-id)
+    {:id player-id}))
 
 (defn poll
   [params])

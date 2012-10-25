@@ -24,7 +24,7 @@
 
 (defroutes app-routes
   (ANY "/new-game" [] (to-json session/new-game))
-  (ANY "/poll"     [] (to-json session/poll)
+  (ANY "/poll"     [] (to-json session/poll))
   (route/not-found "Not Found"))
 
 (def app (-> 
