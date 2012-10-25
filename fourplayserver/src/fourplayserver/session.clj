@@ -42,7 +42,7 @@
   [{id :id}]
   (let [player-id (Integer/parseInt id)]
     (if (= @waiting-player player-id)
-      {:state "WAIT" :board []}
+      {:state "WAIT" :board {:rows board/rows :cols board/cols}}
       (let [game (get-game player-id)
             board (:board game)
             board-state (board/get-board-state board)]
@@ -65,19 +65,20 @@
 
 (defn move
   [{id :id move-index :index}]
-  (dosync
-    (let [player-id (Integer/parseInt id)
-          ]
+  (let [player-id (Integer/parseInt id)
+        move-col (Integer/parseInt move-index)]
+    (dosync
       (if (= @waiting-player player-id)
         (throw (IllegalArgumentException. "Game hasn't started yet!"))
         (let [game (get-game player-id)
               board (:board game)
               board-state (board/get-board-state board)]
-      (if (= 0 board-state)
-        (if (= (:whosnext game) player-id)
-          (let [move-type (if (= (:player1 game) player-id) 1 -1)
-                new-board (board/make-move board move-index move-type)]
-            (update-game! game new-board))
-          (throw (IllegalArgumentException. "It isn't your move!")))
-        (throw (IllegalArgumentException. "Game is already over!"))))))))
+          (if (= 0 board-state)
+            (if (= (:whosnext game) player-id)
+              (let [move-type (if (= (:player1 game) player-id) 1 -1)
+                    new-board (board/make-move board move-col move-type)]
+                (update-game! game new-board))
+              (throw (IllegalArgumentException. "It isn't your move!")))
+        (throw (IllegalArgumentException. "Game is already over!"))))))
+  (get-game player-id)))
         
