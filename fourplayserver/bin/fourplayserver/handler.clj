@@ -14,8 +14,7 @@
 
 (defn wrap-headers [app]
   (fn [req] (let [response (app req)]
-             (merge response {:headers {"Content-Type"                 "application/json"
-                                        "Access-Control-Allow-Headers" "X-Requested-With, Content-Type"
+             (merge response {:headers {"Access-Control-Allow-Headers" "X-Requested-With, Content-Type"
                                         "Access-Control-Allow-Methods" "GET, POST, OPTIONS"
                                         "Access-Control-Allow-Origin"  "*"}}))))
 (defn to-json [f]
@@ -24,7 +23,9 @@
 
 (defroutes app-routes
   (ANY "/new-game" [] (to-json session/new-game))
-  (ANY "/poll"     [] (to-json session/poll)
+  (ANY "/poll"     [] (to-json session/poll))
+  (ANY "/move"     [] (to-json session/move))
+  (route/resources "/")
   (route/not-found "Not Found"))
 
 (def app (-> 
