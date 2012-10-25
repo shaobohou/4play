@@ -79,4 +79,11 @@ public class BoardTest extends TestCase {
         assertEquals(-1, Board.winningPiece(new int[] {0, -1, -1, -1, -1, 1, 1}, 4));
     }
 
+    public void testWillWin() throws Exception {
+        int[] testPieces = {1, -1, 1, 0, -1, 1, 0, 0, 0};
+        Board b = new Board(testPieces, 3, 3);
+        assertTrue(b.willWin(2, 3, 1));
+        assertFalse(b.willWin(0, 3, 1));
+    }
+
 }

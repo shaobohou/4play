@@ -79,10 +79,8 @@ public class Board
         return diag;
     }
 
-    public Board withMove(int col) throws Exception {
-        int[] newBoardState = (int[]) boardState.clone();
+    public int nextRow(int col) {
         int[] colPieces = getColumn(col);
-
         int rowOffset = -1;
         for(int i = 0; i < colPieces.length; ++i) {
             if(colPieces[i] == 0) {
@@ -91,6 +89,12 @@ public class Board
             }
         }
 
+        return rowOffset;
+    }
+
+    public Board withMove(int col) throws Exception {
+        int[] newBoardState = (int[]) boardState.clone();
+        int rowOffset = nextRow(col);
         if(rowOffset == -1) {
             throw new Exception("Bad move - column is full!");
         }
@@ -114,6 +118,20 @@ public class Board
         }
 
         return 0;
+    }
+
+    public boolean willWin(int moveColumn, int winLength, int player) throws Exception {
+        Board nextState = this.withMove(moveColumn);
+
+        int x = moveColumn, y = nextRow(moveColumn);
+        return (winningPiece(nextState.getColumn(x), winLength) == player)
+            || (winningPiece(nextState.getRow(y), winLength) == player)
+            || (winningPiece(nextState.getDiagonal(x, y, 1, 1), winLength) == player)
+            || (winningPiece(nextState.getDiagonal(x, y, 1, -1), winLength) == player);
+    }
+
+    public boolean willLose(int moveColumn, int winLength, int player) throws Exception {
+        return willWin(moveColumn, winLength, player * -1);
     }
 
 }
