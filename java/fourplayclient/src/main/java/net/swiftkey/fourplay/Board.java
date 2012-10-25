@@ -45,4 +45,25 @@ public class Board
 
         return row;
     }
+
+    public Board withMove(int col) throws Exception {
+        int[] newBoardState = (int[]) boardState.clone();
+        int[] colPieces = getColumn(col);
+
+        int rowOffset = -1;
+        for(int i = 0; i < colPieces.length; ++i) {
+            if(colPieces[i] == 0) {
+                rowOffset = i;
+                break;
+            }
+        }
+
+        if(rowOffset == -1) {
+            throw new Exception("Bad move - column is full!");
+        }
+
+        newBoardState[(rowOffset * this.numCols) + col] = 1;
+        return new Board(newBoardState, this.numRows, this.numCols);
+    }
+
 }

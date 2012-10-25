@@ -43,4 +43,12 @@ public class BoardTest extends TestCase {
         assertArrayEquals(new int[] {0, 0, 0}, b.getRow(2));
     }
 
+    public void testWithMove() throws Exception {
+        int[] testPieces = {1, -1, 1, 0, -1, 1, 0, 0, 0};
+        Board b = new Board(testPieces, 3, 3);
+
+        assertEquals(1, b.withMove(0).queryCell(0, 1));
+        assertEquals(1, b.withMove(1).queryCell(1, 2));
+    }
+
 }
