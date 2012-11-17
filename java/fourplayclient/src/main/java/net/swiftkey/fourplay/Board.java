@@ -26,6 +26,14 @@ public class Board
         this.numCols = numCols;
     }
 
+    public int countRows() {
+    	return numRows;
+    }
+    
+    public int countCols() {
+    	return numCols;
+    }
+    
     public int queryCell(int x, int y) {
         int offset = (x + (y * this.numCols));
         return this.boardState[offset];
