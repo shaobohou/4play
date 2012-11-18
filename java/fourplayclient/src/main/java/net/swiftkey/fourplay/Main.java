@@ -66,13 +66,14 @@ public class Main
 		}
 		mState = mServer.poll(mCurrentGameId);
 		
-		System.out.println("handleWait: state=" + mState.getState());
+		System.out.println("handleWait: " + mState.toString());
 	}
 	
 	private static void handleMove() {
-		mServer.move(mCurrentGameId, mPlayer.move(mState.getBoard()));
+		int move = mPlayer.move(mState.getBoard());
+		mServer.move(mCurrentGameId, move);
 		mState = GameState.WAIT_STATE;
-		System.out.println("handleMove: ---");
+		System.out.println("handleMove: move=" + move);
 	}
 	
 	private static void handleWin() {

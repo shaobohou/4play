@@ -25,6 +25,23 @@ public class Board
         this.numRows = numRows;
         this.numCols = numCols;
     }
+    
+    public String toString() {
+    	if (this.boardState == null) {
+    		return "<invalid board>";
+    	}
+    	
+    	StringBuilder sb = new StringBuilder();
+    	for (int y = this.numRows - 1; y >= 0; --y) {
+        	for (int x = 0; x < this.numCols; ++x) {
+        		sb.append(this.queryCell(x, y));
+        		sb.append(" | ");
+        	}
+        	sb.append("\n");
+    	}
+    	
+    	return sb.toString();
+    }
 
     public int countRows() {
     	return numRows;

@@ -41,4 +41,8 @@ public class GameState {
 			return State.LOSE;
 		} else throw new IllegalArgumentException("Unknown state: " + state);
 	}
+	
+	public String toString() {
+		return "GameState: state=" + mState + " board: \n" + mBoard.toString();
+	}
 }
