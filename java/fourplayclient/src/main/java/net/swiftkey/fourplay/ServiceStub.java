@@ -75,7 +75,7 @@ public class ServiceStub {
 	public void move(int gameId, int column) {
 		List<NameValuePair> params = new ArrayList<NameValuePair>();
 		params.add(new BasicNameValuePair("id", Integer.toString(gameId)));
-		params.add(new BasicNameValuePair("move-index", Integer.toString(column)));
+		params.add(new BasicNameValuePair("index", Integer.toString(column)));
 		httpPost("move", params);
 	}
 	
