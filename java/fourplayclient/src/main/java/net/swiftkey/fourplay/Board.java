@@ -34,8 +34,7 @@ public class Board
     	StringBuilder sb = new StringBuilder();
     	for (int y = this.numRows - 1; y >= 0; --y) {
         	for (int x = 0; x < this.numCols; ++x) {
-        		sb.append(this.queryCell(x, y));
-        		sb.append(" | ");
+        		sb.append(String.format(" %-2s |", Integer.toString(this.queryCell(x, y))));
         	}
         	sb.append("\n");
     	}

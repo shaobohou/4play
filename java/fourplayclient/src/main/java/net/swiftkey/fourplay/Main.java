@@ -48,7 +48,15 @@ public class Main
     			startNewGame();
     		}
     	}
+    	
+    	printSummary();
     }
+	
+	private static void printSummary() {
+		System.out.println("Played: " + mPlayedCount);
+		System.out.println("Won:    " + mWinCount);
+		System.out.println("Lost:   " + mLoseCount);
+	}
 	
 	private static void startNewGame() {
 		mPlayedCount += 1;
