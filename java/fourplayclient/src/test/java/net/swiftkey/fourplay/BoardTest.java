@@ -148,5 +148,16 @@ public class BoardTest extends TestCase {
         assertFalse(b.hasWon(-1, 4));
         assertFalse(b.hasWon(1, 3));
     }
+    
+    public void testIsDraw() {
+        int[] testPieces = {  1, -1, -1,
+                              1, -1,  1,
+                             -1,  1, -1 };
+        Board b = new Board(testPieces, 3, 3);
+        
+        assertTrue(b.isDraw(4));
+        assertFalse(b.isDraw(3));
+    }
+    
 
 }
