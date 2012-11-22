@@ -20,6 +20,7 @@ public class BrutePlayer implements Player {
             
             int bestRow = -1;
             double bestScore = -1.0;
+            double worstScore = 1.0;
             ArrayList<Integer> moves = new ArrayList<Integer>();
             ArrayList<Double> scores = new ArrayList<Double>();
             if(mDepth>0) {
@@ -34,20 +35,28 @@ public class BrutePlayer implements Player {
                             bestScore = score;
                             bestRow = row;
                         }
+
+                        if(score < worstScore) {
+                            worstScore = score;
+                        }
                     }
                 }
             }
 
             double finishTime = System.currentTimeMillis();
 
-            System.out.println(moves.toString());
-            System.out.println(scores.toString());
+            // System.out.println(moves.toString());
+            // System.out.println(scores.toString());
             
             System.out.println("best score = " + bestScore);
             System.out.println("took " + (finishTime-startTime));
 
             if(bestRow>=0) {
-                return bestRow;
+                if(java.lang.Math.abs(bestScore-worstScore)<1e-3) {
+                    return moves.get(mRandom.nextInt(moves.size()));
+                } else {
+                    return bestRow;
+                }
             }
         } catch (Exception e) {
             // do nothing
@@ -58,7 +67,7 @@ public class BrutePlayer implements Player {
 
     public double scoreMove(Board b, int row, int depth) throws Exception {
         if(depth<1) {
-            return 0.0;
+            return 0.1;
         }
 
         // win
