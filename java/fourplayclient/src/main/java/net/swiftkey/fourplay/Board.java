@@ -285,6 +285,16 @@ public class Board
             || (winningPiece(nextState.getDiagonal(x, y, 1, -1), winLength) == player);
     }
 
+    public boolean opponentMovePlayerWin(int moveColumn, int winLength, int player) throws Exception {
+        Board nextState = this.withOpponentMove(moveColumn);
+
+        int x = moveColumn, y = nextRow(moveColumn);
+        return (winningPiece(nextState.getColumn(x), winLength) == player)
+            || (winningPiece(nextState.getRow(y), winLength) == player)
+            || (winningPiece(nextState.getDiagonal(x, y, 1, 1), winLength) == player)
+            || (winningPiece(nextState.getDiagonal(x, y, 1, -1), winLength) == player);
+    }
+
     /**
      * The opposite of willWin.
      * 
@@ -296,6 +306,10 @@ public class Board
      */
     public boolean willLose(int moveColumn, int winLength, int player) throws Exception {
         return willWin(moveColumn, winLength, player * -1);
+    }
+
+    public boolean opponentMovePlayerLose(int moveColumn, int winLength, int player) throws Exception {
+        return opponentMovePlayerWin(moveColumn, winLength, player * -1);
     }
 
     /**
