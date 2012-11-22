@@ -53,16 +53,7 @@ public class ServiceStub {
 	 * @param gameId The game ID to check with the server.
 	 */
 	public GameState poll(int gameId) {
-		List<NameValuePair> params = new ArrayList<NameValuePair>();
-		params.add(new BasicNameValuePair("id", Integer.toString(gameId)));
-		
-		Response r = request("poll", params, PollResponse.class);
-		if (r instanceof PollResponse) {
-			PollResponse pr = (PollResponse) r;
-			return new GameState(pr.state, pr.board.state, pr.board.rows, pr.board.cols);
-		} else {
-			return null;
-		}
+	    return doPoll(gameId, "poll");
 	}
 	
 	/**
@@ -73,10 +64,53 @@ public class ServiceStub {
 	 *                current game 
 	 */
 	public void move(int gameId, int column) {
-		List<NameValuePair> params = new ArrayList<NameValuePair>();
-		params.add(new BasicNameValuePair("id", Integer.toString(gameId)));
-		params.add(new BasicNameValuePair("index", Integer.toString(column)));
-		httpPost("move", params);
+	    doMove(gameId, column, "move");
+	}
+	
+	/**
+	 * Join a tournament running on the server.
+	 * 
+	 * @param playerName The name of this bot.
+	 * @return the game ID, or -1 if there was a problem.
+	 */
+	public int joinTournament(String playerName) {
+	    List<NameValuePair> params = new ArrayList<NameValuePair>();
+	    params.add(new BasicNameValuePair("name", playerName));
+	    
+	    Response r = request("tournament/join", params, NewGameResponse.class);
+	    if (r instanceof NewGameResponse) {
+	            return ((NewGameResponse) r).id;
+	    } else {
+	        return -1;
+	    }
+	} 
+	
+	public GameState pollTournament(int gameId) {
+	    return doPoll(gameId, "tournament/poll");
+	}
+	
+	public void moveTournament(int gameId, int column) {
+	    doMove(gameId, column, "tournament/move");
+	}
+	
+	private GameState doPoll(int gameId, String endPoint) {
+       List<NameValuePair> params = new ArrayList<NameValuePair>();
+        params.add(new BasicNameValuePair("id", Integer.toString(gameId)));
+        
+        Response r = request(endPoint, params, PollResponse.class);
+        if (r instanceof PollResponse) {
+            PollResponse pr = (PollResponse) r;
+            return new GameState(pr.state, pr.board.state, pr.board.rows, pr.board.cols);
+        } else {
+            return null;
+        }
+	}
+	
+	private void doMove(int gameId, int column, String endPoint) {
+       List<NameValuePair> params = new ArrayList<NameValuePair>();
+       params.add(new BasicNameValuePair("id", Integer.toString(gameId)));
+       params.add(new BasicNameValuePair("index", Integer.toString(column)));
+       httpPost(endPoint, params);
 	}
 	
 	private String makeUrl(String endPoint) {

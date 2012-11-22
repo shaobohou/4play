@@ -3,6 +3,7 @@
             [compojure.route :as route]
             [compojure.core :refer :all]
             [fourplayserver.session :as session]
+            [fourplayserver.tournament :as tournament]
             [cheshire.core     :refer [generate-string parse-string]]))
 
 (defn wrap-exceptions [app]
@@ -25,10 +26,19 @@
   (ANY "/new-game" [] (to-json session/new-game))
   (ANY "/poll"     [] (to-json session/poll))
   (ANY "/move"     [] (to-json session/move))
+  (context 
+    "/tournament" []
+    (ANY "/join" [] (to-json tournament/join))
+    (ANY "/reset" [] (to-json tournament/reset))
+    (ANY "/players" [] (to-json tournament/players))
+    (ANY "/state" [] (to-json tournament/state))
+    (ANY "/start" [] (to-json tournament/start))
+    (ANY "/poll" [] (to-json tournament/poll))
+    (ANY "/move" [] (to-json tournament/move)))
   (route/resources "/")
   (route/not-found "Not Found"))
 
-(def app (-> 
+(def app (->
            app-routes
            handler/api
            wrap-exceptions

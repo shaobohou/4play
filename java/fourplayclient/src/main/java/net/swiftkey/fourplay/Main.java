@@ -6,11 +6,11 @@ public class Main
 {
 	private static final String PLAYER_NAME = "Player1";
 	
-	private static final int POLL_INTERVAL_MS = 200;
+	private static final int POLL_INTERVAL_MS = 50;
 	private static final int TOTAL_GAMES = 10;
 
 	// TODO - set this with a command line arg
-	private static ServiceStub mServer = new ServiceStub("localhost", 3000);
+	private static ServiceStub mServer = new ServiceStub("172.16.1.126", 3001);
 	
 	// TODO - Plug in a different solver!
 	private static Player mPlayer = new BrutePlayer(3);
@@ -60,7 +60,7 @@ public class Main
 	
 	private static void startNewGame() {
 		mPlayedCount += 1;
-		mCurrentGameId = mServer.newGame(PLAYER_NAME);
+		mCurrentGameId = mServer.joinTournament(PLAYER_NAME);
 		mState = GameState.WAIT_STATE;
 
 		System.out.println("startNewGame: gameId=" + mCurrentGameId);
@@ -72,33 +72,33 @@ public class Main
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
-		mState = mServer.poll(mCurrentGameId);
+		mState = mServer.pollTournament(mCurrentGameId);
 		
 		System.out.println("handleWait: " + mState.toString());
 	}
 	
 	private static void handleMove() {
 		int move = mPlayer.move(mState.getBoard());
-		mServer.move(mCurrentGameId, move);
+		mServer.moveTournament(mCurrentGameId, move);
 		mState = GameState.WAIT_STATE;
 		System.out.println("handleMove: move=" + move);
 	}
 	
 	private static void handleWin() {
 		mWinCount += 1;
-		mState = null;
+		mState = GameState.WAIT_STATE;
 		System.out.println("handleWin: mWinCount=" + mWinCount);
 	}
 	
 	private static void handleLose() {
 		mLoseCount += 1;
-		mState = null;
+        mState = GameState.WAIT_STATE;
 		System.out.println("handleLose: mLoseCount=" + mLoseCount);
 	}
 	
 	private static void handleDraw() {
 		mDrawCount += 1;
-		mState = null;
+        mState = GameState.WAIT_STATE;
 		System.out.println("handleDraw: mDrawCount=" + mDrawCount);
 	}
 }

@@ -100,4 +100,64 @@ public class BoardTest extends TestCase {
         assertTrue(bComplete.isComplete());
     }
     
+    public void testHasWonVertical() {
+        int[] testPieces = {1, -1, 1, -1, 
+                            0, -1, 1,  1,
+                            0,  0, 0,  1,
+                            0,  0, 0,  1};
+        Board b = new Board(testPieces, 4, 4);
+        
+        assertTrue(b.hasWon(1, 3));
+        assertFalse(b.hasWon(1, 4));
+        assertFalse(b.hasWon(-1, 3));
+    }
+    
+    public void testHasWonHoirzontal() {
+        int[] testPieces = {1, -1, 1, -1, 
+                            0,  1, 1,  1,
+                            0,  0, 0, -1,
+                            0,  0, 0,  0};
+        Board b = new Board(testPieces, 4, 4);
+        
+        assertTrue(b.hasWon(1, 3));
+        assertFalse(b.hasWon(1, 4));
+        assertFalse(b.hasWon(-1, 3));
+    }
+
+    public void testHasWonDiagonal1() {
+        int[] testPieces = {1, -1,  1, -1, 
+                            0,  1, -1,  1,
+                            0,  0,  0, -1,
+                            0,  0,  0,  0};
+        Board b = new Board(testPieces, 4, 4);
+        
+        assertTrue(b.hasWon(-1, 3));
+        assertTrue(b.hasWon(1, 2));
+        assertFalse(b.hasWon(-1, 4));
+        assertFalse(b.hasWon(1, 3));
+    }
+
+    public void testHasWonDiagonal2() {
+        int[] testPieces = { 1, -1, -1, -1, 
+                             1, -1,  1,  1,
+                            -1,  0,  0, -1,
+                             0,  0,  0,  0};
+        Board b = new Board(testPieces, 4, 4);
+        
+        assertTrue(b.hasWon(-1, 3));
+        assertFalse(b.hasWon(-1, 4));
+        assertFalse(b.hasWon(1, 3));
+    }
+    
+    public void testIsDraw() {
+        int[] testPieces = {  1, -1, -1,
+                              1, -1,  1,
+                             -1,  1, -1 };
+        Board b = new Board(testPieces, 3, 3);
+        
+        assertTrue(b.isDraw(4));
+        assertFalse(b.isDraw(3));
+    }
+    
+
 }

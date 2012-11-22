@@ -58,6 +58,14 @@ public class Board
     }
     
     /**
+     * Return the board state as an array of integers.
+     * @return an array of ints representing the board state.
+     */
+    public int[] serializeBoard() {
+        return this.boardState;
+    }
+    
+    /**
      * Pretty-print the board state, in columns.
      */
     public String toString() {
@@ -327,5 +335,50 @@ public class Board
         }
         
         return true;
+    }
+    
+    /**
+     * Check to see if the board is now in a draw state.
+     * 
+     * @param winLength number required in a row to win.
+     * @return true if this is a draw.
+     */
+    public boolean isDraw(int winLength) {
+        return isComplete() && !hasWon(1, winLength) && !hasWon(-1, winLength);
+    }
+    
+    /**
+     * Check to see if player has won.
+     * 
+     * @param player the player number (1 or -1)
+     * @param winLength the number required in a row to win.
+     * @return true if player has won.
+     */
+    public boolean hasWon(int player, int winLength) {
+        for(int i = 0; i < this.numCols; ++i) {
+            int[] col = getColumn(i);
+            if (winningPiece(col, winLength) == player) {
+                return true;
+            }
+        }
+        
+        for(int i = 0; i < this.numRows; ++i) {
+            int[] row = getRow(i);
+            if(winningPiece(row, winLength) == player) {
+                return true;
+            }
+        }
+        
+        // This is unnecessary, could be much faster!
+        for (int x = 0; x < this.numCols; ++x) {
+            for (int y = 0; y < this.numRows; ++y) {
+                if ((winningPiece(getDiagonal(x, y, 1, 1), winLength) == player)
+                 || (winningPiece(getDiagonal(x, y, 1, -1), winLength) == player)) {
+                    return true;
+                }
+            }
+        }
+        
+        return false;
     }
 }
