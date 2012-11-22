@@ -13,7 +13,7 @@ public class Main
 	private static ServiceStub mServer = new ServiceStub("172.16.1.126", 3001);
 	
 	// TODO - Plug in a different solver!
-	private static Player mPlayer = new IdiotPlayer();
+	private static Player mPlayer = new BrutePlayer(3);
 	
 	private static GameState mState = null;
 	private static int mCurrentGameId = -1;
