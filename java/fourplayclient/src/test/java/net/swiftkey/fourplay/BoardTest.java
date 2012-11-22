@@ -81,5 +81,23 @@ public class BoardTest extends TestCase {
         assertTrue(b.willWin(2, 3, 1));
         assertFalse(b.willWin(0, 3, 1));
     }
+    
+    public void testCount() {
+        int[] testPieces = {1, -1, 1, 0, -1, 1, 0, 0, 0};
+        Board b = new Board(testPieces, 3, 3);
 
+        assertTrue(b.countCols() == 3);
+        assertTrue(b.countRows() == 3);
+    }
+
+    public void testIsComplete() {
+        int[] testPiecesAvailable = {1, -1, 1, 0, -1, 1, 0, 0, 0};
+        Board bOpen = new Board(testPiecesAvailable, 3, 3);
+        assertFalse(bOpen.isComplete());
+        
+        int[] testPiecesUnavailable = {1, -1, 1, 1, -1, 1, -1, -1, 1};
+        Board bComplete = new Board(testPiecesUnavailable, 3, 3);
+        assertTrue(bComplete.isComplete());
+    }
+    
 }
