@@ -16,6 +16,8 @@ import java.util.ArrayList;
  *   1 - cell occupied by you
  *  -1 - cell occupied by opponent.
  *  
+ *  In this class, all offsets (for rows and columns) are 0-based.
+ *  
  */
 public class Board
 {
@@ -202,6 +204,18 @@ public class Board
         return rowOffset;
     }
 
+    private Board withPlayerMove(int col, int player) throws Exception {
+        int[] newBoardState = (int[]) boardState.clone();
+        int rowOffset = nextRow(col);
+        if(rowOffset == -1) {
+            throw new Exception("Bad move - column is full!");
+        }
+
+        newBoardState[(rowOffset * this.numCols) + col] = player;
+        return new Board(newBoardState, this.numRows, this.numCols);
+        
+    }
+    
     /**
      * Return a new Board state instance representing how
      * the board would be if you played the given move.
@@ -211,14 +225,19 @@ public class Board
      * @throws Exception if your move isn't valid.
      */
     public Board withMove(int col) throws Exception {
-        int[] newBoardState = (int[]) boardState.clone();
-        int rowOffset = nextRow(col);
-        if(rowOffset == -1) {
-            throw new Exception("Bad move - column is full!");
-        }
+        return withPlayerMove(col, 1);
+    }
 
-        newBoardState[(rowOffset * this.numCols) + col] = 1;
-        return new Board(newBoardState, this.numRows, this.numCols);
+    /**
+     * Return a new Board state instance representing how
+     * the board would be if your opponent played in the given column.
+     * 
+     * @param col column to pretend your opened placed a piece.
+     * @return new board state instance, representing your opponent's move.
+     * @throws Exception if that move isn't valid.
+     */
+    public Board withOpponentMove(int col) throws Exception {
+        return withPlayerMove(col, -1);
     }
 
     /**
