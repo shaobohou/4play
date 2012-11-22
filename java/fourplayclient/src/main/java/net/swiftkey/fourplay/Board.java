@@ -58,6 +58,14 @@ public class Board
     }
     
     /**
+     * Return the board state as an array of integers.
+     * @return an array of ints representing the board state.
+     */
+    public int[] serializeBoard() {
+        return this.boardState;
+    }
+    
+    /**
      * Pretty-print the board state, in columns.
      */
     public String toString() {
