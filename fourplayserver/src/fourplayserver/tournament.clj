@@ -35,11 +35,10 @@
   "Logs the results of a game of a player and sets them
    to waiting state."
   [player opponent result]
-  (dosync
-    (alter tournament 
-           (fn [t] (assoc t 
-                          :players (assoc (:players t) player (log-result-player (get (:players t) player) result))
-                          :results (merge-with + (:results t) {[player opponent] result}))))))
+  (alter tournament 
+         (fn [t] (assoc t 
+                        :players (assoc (:players t) player (log-result-player (get (:players t) player) result))
+                        :results (merge-with + (:results t) {[player opponent] result})))))
 
 (defn get-waiting-players
   "Gets waiting players (who are not player-id)"
@@ -49,51 +48,51 @@
 (defn assign-next-game!
   "Attemps to assign a next game for a player. Does nothing if there are no viable opps"
   [player-id]
-  (dosync
-    (let [last-opp (:last-opp (get (:players @tournament) player-id))
-          waiting-players (remove #(= % last-opp) (get-waiting-players player-id))]
-      (when-not (empty? waiting-players)
-        (let [opp-id (first (shuffle waiting-players))]
-          (create-game! player-id opp-id)
+  (let [last-opp (:last-opp (get (:players @tournament) player-id))
+        waiting-players (remove #(= % last-opp) (get-waiting-players player-id))]
+    (when-not (empty? waiting-players)
+      (let [opp-id (first (shuffle waiting-players))]
+        (create-game! player-id opp-id)
           (alter tournament
                  (fn [t]
                    (assoc t :players
                           (merge-with merge (:players t)
                                       {player-id {:state :PLAYING :last-opp opp-id}
-                                       opp-id {:state :PLAYING :last-opp player-id}})))))))))
+                                       opp-id {:state :PLAYING :last-opp player-id}}))))))))
 
 (defn poll
   [{id :id}]
-  (let [player-id (Integer/parseInt id)]
-    (if (true? (:running @tournament))
-      (if (= :WAIT (:state (get (:players @tournament) player-id)))
-        (do
-          (assign-next-game! player-id)
+  (dosync
+    (let [player-id (Integer/parseInt id)]
+      (if (true? (:running @tournament))
+        (if (= :WAIT (:state (get (:players @tournament) player-id)))
+          (do
+            (assign-next-game! player-id)
           {:state "WAIT" :board {:rows board/rows :cols board/cols}})
-        (let [game (get-game player-id)
-              board (:board game)
-              board-state (board/get-board-state board)]
-          (cond 
-            (nil? game)
-            (throw (IllegalArgumentException. "Unregistered player id"))
-            (= 1 board-state)
-            (if (= (:player1 game) player-id)
-              (do (conclude-game! player-id (:player2 game) 1) {:state "WON" :board (board/serialize-board board)})
-              (do (conclude-game! player-id (:player2 game) -1) {:state "LOST" :board (board/serialize-board board)}))
-            (= -1 board-state)
-            (if (= (:player2 game) player-id)
-              (do (conclude-game! player-id (:player1 game) 1) {:state "WON" :board (board/flip-board (board/serialize-board board))})
-              (do (conclude-game! player-id (:player1 game) -1) {:state "LOST" :board (board/flip-board (board/serialize-board board))}))
-            (= :DRAW board-state)
-             (if (= (:player1 game) player-id) 
-              (do (conclude-game! player-id (:player2 game) 0) {:state "DRAW" :board (board/flip-board (board/serialize-board board))})
-              (do (conclude-game! player-id (:player1 game) 0) {:state "DRAW" :board (board/flip-board (board/serialize-board board))}))
-            :else ;in play
-            (let [board-inner (if (= (:player2 game) player-id) (board/flip-board (board/serialize-board board)) (board/serialize-board board))]
-              (if (= (:whosnext game) player-id)
-                {:state "MOVE" :board board-inner}
-                {:state "WAIT" :board board-inner})))))
-      {:state "WAIT" :board {:rows board/rows :cols board/cols}})))
+          (let [game (get-game player-id)
+                board (:board game)
+                board-state (board/get-board-state board)]
+            (cond 
+              (nil? game)
+              (throw (IllegalArgumentException. "Unregistered player id"))
+              (= 1 board-state)
+              (if (= (:player1 game) player-id)
+                (do (conclude-game! player-id (:player2 game) 1) {:state "WON" :board (board/serialize-board board)})
+                (do (conclude-game! player-id (:player2 game) -1) {:state "LOST" :board (board/serialize-board board)}))
+              (= -1 board-state)
+              (if (= (:player2 game) player-id)
+                (do (conclude-game! player-id (:player1 game) 1) {:state "WON" :board (board/flip-board (board/serialize-board board))})
+                (do (conclude-game! player-id (:player1 game) -1) {:state "LOST" :board (board/flip-board (board/serialize-board board))}))
+              (= :DRAW board-state)
+              (if (= (:player1 game) player-id) 
+                (do (conclude-game! player-id (:player2 game) 0) {:state "DRAW" :board (board/flip-board (board/serialize-board board))})
+                (do (conclude-game! player-id (:player1 game) 0) {:state "DRAW" :board (board/flip-board (board/serialize-board board))}))
+              :else ;in play
+              (let [board-inner (if (= (:player2 game) player-id) (board/flip-board (board/serialize-board board)) (board/serialize-board board))]
+                (if (= (:whosnext game) player-id)
+                  {:state "MOVE" :board board-inner}
+                  {:state "WAIT" :board board-inner})))))
+        {:state "WAIT" :board {:rows board/rows :cols board/cols}}))))
   
 (defn update-game!
   [game new-board]
