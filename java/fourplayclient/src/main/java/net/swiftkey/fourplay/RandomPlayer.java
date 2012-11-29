@@ -55,10 +55,10 @@ public class RandomPlayer implements Player {
                 }
             }
         }
-        System.out.println(Arrays.toString(scores));
+        // System.out.println(Arrays.toString(scores));
 
-        double finishTime = System.currentTimeMillis();
-        System.out.println("took " + (finishTime-startTime) + " for " + total + " iterations");
+        // double finishTime = System.currentTimeMillis();
+        // System.out.println("took " + (finishTime-startTime) + " for " + total + " iterations");
 
         if(best>=0) {
             return best;

@@ -59,10 +59,16 @@ public class BrutePlayer implements Player {
                 }
             }
         } catch (Exception e) {
+            System.out.println("Exception in BrutePlayer");
             // do nothing
         }
+
+        int move = mRandom.nextInt(b.countCols());
+        while(b.nextRow(move)<0) {
+            move = mRandom.nextInt(b.countCols());
+        }
             
-        return mRandom.nextInt(b.countCols());
+        return move;
     }
 
     public double scoreMove(Board b, int row, int depth) throws Exception {
