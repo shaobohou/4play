@@ -71,19 +71,21 @@ public class RandomPlayer implements Player {
         for(int d = 0; d < depth; ++d) {
             if(b.isComplete()) break;
 
-            // player move
+            // opponent move
+            b = b.invert();
             int nextMove = mRandom.nextInt(b.countCols());
             while(b.nextRow(nextMove)<0) { nextMove = mRandom.nextInt(b.countCols()); }
-            if (b.willWin(nextMove, 4, 1)) { return 1.0; }
+            if (b.willWin(nextMove, 4, 1)) { return 0.0; }
             b = b.withMove(nextMove);
 
             if(b.isComplete()) break;
 
-            // opponent move
+            // player move
+            b = b.invert();
             nextMove = mRandom.nextInt(b.countCols());
             while(b.nextRow(nextMove)<0) { nextMove = mRandom.nextInt(b.countCols()); }
-            if (b.opponentMovePlayerLose(nextMove, 4, 1)) { return 0.0; }
-            b = b.withOpponentMove(nextMove);
+            if (b.willWin(nextMove, 4, 1)) { return 1.0; }
+            b = b.withMove(nextMove);
         }
 
         // System.out.println(b.toString());

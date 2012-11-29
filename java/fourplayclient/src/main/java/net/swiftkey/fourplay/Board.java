@@ -381,4 +381,12 @@ public class Board
         
         return false;
     }
+
+    public Board invert() {
+        int[] newBoardState = (int[]) boardState.clone();
+        for(int i = 0; i < newBoardState.length; ++i) {
+            newBoardState[i] *= -1;
+        }
+        return new Board(newBoardState, this.numRows, this.numCols);
+    }
 }
