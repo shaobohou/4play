@@ -10,7 +10,7 @@ public class Main
 	private static final int TOTAL_GAMES = 10;
 
 	// TODO - set this with a command line arg
-	private static ServiceStub mServer = new ServiceStub("172.16.1.126", 3001);
+	private static ServiceStub mServer = new ServiceStub("localhost", 3000);
 	
 	// TODO - Plug in a different solver!
 	private static Player mPlayer = new IdiotPlayer();
