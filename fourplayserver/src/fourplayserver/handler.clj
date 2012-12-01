@@ -2,7 +2,6 @@
   (:require [compojure.handler :as handler]
             [compojure.route :as route]
             [compojure.core :refer :all]
-            [fourplayserver.session :as session]
             [fourplayserver.tournament :as tournament]
             [cheshire.core     :refer [generate-string parse-string]]))
 
@@ -23,9 +22,6 @@
     (generate-string (f (-> req :params)))))
 
 (defroutes app-routes
-  (ANY "/new-game" [] (to-json session/new-game))
-  (ANY "/poll"     [] (to-json session/poll))
-  (ANY "/move"     [] (to-json session/move))
   (context 
     "/tournament" []
     (ANY "/join" [] (to-json tournament/join))
@@ -43,3 +39,10 @@
            handler/api
            wrap-exceptions
            wrap-headers))
+
+(defn on-socket-message [connection json-message]
+  (println json-message)
+  (let [message (get (parse-string json-message) "message")]
+    (cond
+      (= "reset" message)
+      (do (println "RESET") (tournament/reset {})))))

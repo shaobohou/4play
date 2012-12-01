@@ -1,18 +1,62 @@
+<!DOCTYPE html>
 <html>
     <head>
         <script src="jquery-1.7.1.min.js"></script>
+	<script src="jquery.gracefulWebSocket.js"></script>
+	<link rel="stylesheet" type="text/css" href="main.css" />
         <title>4play Tournament Master</title>
         <script>
+	    
+	var ws = $.gracefulWebSocket("ws://127.0.0.1:8080/websocket");
+	
+	var players = {};
+	    
+	function reset(){
+	    ws.send(JSON.stringify({message : "reset"}))
+	}
+	
+	function addPlayer(id, name){
+	    players.id = name;
+	    $("#players").append("<li style='display:none' id=player" + id + ">" + name + "</li>");
+	    $("#player" + id).fadeIn("slow");
+	}
+	
         function getPlayers (){
-        	$.get("/tournament/players", function (data){
-        		$.each(data, function (datum){
-        			players.append
-        		})
+            $.get("/tournament/players", function (data){
+        	    $.each(data, function (datum){
+        		    players.append
+        	    })
         	})
         }
+	
+	function getTournamentState(){
+	    getPlayers();
+	}
+	
+	
+	ws.onmessage = function (event) {
+	    var data = JSON.parse(event.data);
+	    var type = data["type"];
+	    var message = data["message"];
+	    
+	    switch(type)
+	    {
+	    case "player-joined":
+		addPlayer(message.id, message.name);		    
+	    }
+	};
+	
         </script>
     </head>
-    <body onload="">
-       <div id="playersDiv"><ul id="players"></ul></div>
+    <body>
+    <div class="wrapper">
+	<div class="content">
+	    foo
+	</div>
+        <div class="nav">
+	    <ul id="players">
+	    </ul>
+	</div>
+    </div>
     </body>
 </html>

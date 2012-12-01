@@ -1,5 +1,13 @@
 (ns fourplayserver.tournament
-  (:require [fourplayserver.java-interop :as board]))
+  (:require [cheshire.core :as json]
+            [fourplayserver.java-interop :as board]
+            [fourplayserver.models.socket-connections :refer [connections]]))
+
+(defn send-socket-message
+  [type message]
+  (doseq [connection @connections]
+    (println message)
+    (.send connection (json/generate-string {:type type :message message}))))
 
 (defonce tournament (ref {:running false :players {} :results {}}))
 
@@ -125,7 +133,9 @@
     (throw (IllegalArgumentException. "Tournament has already started!"))
     (if (< (count (:players @tournament)) 3)
       (throw (IllegalArgumentException. "Not enough players"))
-      (dosync (alter tournament (fn [t] (assoc t :running true)))))))
+      (do 
+        (send-socket-message "tournament-started" name)
+        (dosync (alter tournament (fn [t] (assoc t :running true))))))))
 
 (defn join
   [{name :name}]
@@ -134,6 +144,7 @@
     (if name
       (dosync
         (let [player-id (inc (count (get @tournament :players)))]
+          (send-socket-message "player-joined" {:id player-id :name name})
           (alter tournament (fn [t] 
                               (assoc t 
                                      :players (assoc (:players t) player-id {:name name :state :WAIT :last-opp nil
