@@ -12,7 +12,12 @@
 	var players = {};
 	    
 	function reset(){
-	    ws.send(JSON.stringify({message : "reset"}))
+	    ws.send(JSON.stringify({message : "reset"}));
+	    getTournamentState();
+	}
+	
+	function start(){
+	    ws.send(JSON.stringify({message : "start"}))
 	}
 	
 	function addPlayer(id, name){
@@ -22,14 +27,16 @@
 	}
 	
         function getPlayers (){
-            $.get("/tournament/players", function (data){
-        	    $.each(data, function (datum){
-        		    players.append
+            $.getJSON("/tournament/players", function (data){
+        	    $.each(data, function (id){
+			addPlayer(id, data[id].name);
         	    })
         	})
         }
 	
 	function getTournamentState(){
+	    $("#players").html("<li>Players</li>");
+	    players = {};
 	    getPlayers();
 	}
 	
@@ -42,19 +49,23 @@
 	    switch(type)
 	    {
 	    case "player-joined":
-		addPlayer(message.id, message.name);		    
+		addPlayer(message.id, message.name);
+	    case "game-end":
+		logResult(message.player1, message.player2, result, board);
 	    }
 	};
 	
         </script>
     </head>
-    <body>
+    <body onload="getTournamentState();">
     <div class="wrapper">
 	<div class="content">
-	    foo
+	    <div id="start" class="button" onclick="start()">Start</div>
+	    <div id="reset" class="button" onclick="reset()">Reset</div>
 	</div>
         <div class="nav">
 	    <ul id="players">
+		<li>Players</li>
 	    </ul>
 	</div>
     </div>

@@ -7,6 +7,7 @@
   :dependencies [[ring/ring-jetty-adapter "1.1.6"]
                  [org.clojure/clojure "1.4.0"]
                  [compojure "1.1.1"]
+                 [net.swiftkey.fourplay/fourplayclient "1.0-SNAPSHOT"]
                  [cheshire "4.0.1"]
                  [com.google.code.gson/gson "2.2.2"]
                  [org.apache.httpcomponents/httpclient-cache "4.2.2"]

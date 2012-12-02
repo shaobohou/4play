@@ -45,4 +45,6 @@
   (let [message (get (parse-string json-message) "message")]
     (cond
       (= "reset" message)
-      (do (println "RESET") (tournament/reset {})))))
+      (do (println "RESET") (tournament/reset {}))
+      (= "start" message)
+      (do (println "START") (tournament/start {})))))

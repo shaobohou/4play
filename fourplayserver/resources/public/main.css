@@ -1,3 +1,7 @@
+body{
+  font-family: arial;
+}
+
 .wrapper {
   padding: 2em;
   max-width:  980px;
@@ -7,23 +11,50 @@
 }
 .nav {
   position: absolute;
-  width: 150px;
+  width: 200px;
   top: 2em;
 }
 .content {
-  margin-left: 200px;
+  margin-left: 220px;
 }
 
 .nav > ul{
     list-style-type:none;
+    margin-top:50px;
+}
+
+.nav > ul > li:first-child {
+     background-color: lightsalmon;
 }
 
 .nav > ul > li {
-     background-color: #FF6A00;
+     background-color: lightsteelblue;
      padding:10px;
      margin: 5px;
+     border-radius: 10px;
+     text-align: center;
+     color: darkslategrey;
 }
 .nav > ul > li a:link, .nav > ul > li a:visited {
     display: block;
     color:white;
+}
+
+.button{
+  display: inline-block;
+  box-shadow: 3px 3px 1px #888;
+  cursor: pointer;
+  width:200px;
+  padding:10px;
+  margin: 5px;
+  border-radius: 10px;
+  text-align: center;
+}
+
+#start{
+  background-color: lightgreen;
+}
+
+#reset{
+  background-color:burlyWood;
 }
