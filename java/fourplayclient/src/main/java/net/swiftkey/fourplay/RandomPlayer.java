@@ -6,6 +6,7 @@ import java.util.Arrays;
 
 public class RandomPlayer implements Player {
 
+    Player mIdiot = new IdiotPlayer();
     Random mRandom = new Random();
     int mSamples = 10000;
     int mDepth = 10;
@@ -37,7 +38,7 @@ public class RandomPlayer implements Player {
             // simulate moves
             for (int i = 0; i < mSamples; ++i) {
                 int col = validCols.get(mRandom.nextInt(validCols.size()));
-                scores[col] += simulate(b.withMove(col), mDepth);
+                scores[col] += simulate(b.withMove(col).invert(), mDepth);
                 ++counts[col];
             }
         } catch (Exception e) {
@@ -58,10 +59,10 @@ public class RandomPlayer implements Player {
                 }
             }
         }
-        // System.out.println(Arrays.toString(scores));
 
-        // double finishTime = System.currentTimeMillis();
-        // System.out.println("took " + (finishTime-startTime) + " for " + total + " iterations");
+        double finishTime = System.currentTimeMillis();
+        System.out.println("took " + (finishTime-startTime) + " for " + total + " iterations");
+        System.out.println(Arrays.toString(scores));
 
         if(best>=0) {
             return best;
@@ -75,20 +76,18 @@ public class RandomPlayer implements Player {
             if(b.isComplete()) break;
 
             // opponent move
-            b = b.invert();
             int nextMove = mRandom.nextInt(b.countCols());
             while(b.nextRow(nextMove)<0) { nextMove = mRandom.nextInt(b.countCols()); }
             if (b.willWin(nextMove, 4, 1)) { return 0.0; }
-            b = b.withMove(nextMove);
+            b = b.withMove(nextMove).invert();
 
             if(b.isComplete()) break;
 
             // player move
-            b = b.invert();
             nextMove = mRandom.nextInt(b.countCols());
             while(b.nextRow(nextMove)<0) { nextMove = mRandom.nextInt(b.countCols()); }
             if (b.willWin(nextMove, 4, 1)) { return 1.0; }
-            b = b.withMove(nextMove);
+            b = b.withMove(nextMove).invert();
         }
 
         // System.out.println(b.toString());
