@@ -21,7 +21,7 @@
 	}
 	
 	function addPlayer(id, name){
-	    players.id = name;
+	    players[id] = name;
 	    $("#players").append("<li style='display:none' id=player" + id + ">" + name + "</li>");
 	    $("#player" + id).fadeIn("slow");
 	}
@@ -34,8 +34,30 @@
         	})
         }
 	
+	var results = 0;
+	
+	function logResult(player1, player2, result, board){
+	    var message = "";
+	    
+	    switch(result)
+	    {
+		case 0:
+		    message = player1 + " drew with " + player2;
+		case 1:
+		    message = player1 + " beat " + player2;
+		case -1:
+		    message = player2 + " beat " + player1;
+		
+	    }
+	    
+	    $("#results").prepend("<li style='display:none' id=results" + results + ">" + message + "</li>");
+	    $("#results" + results).fadeIn("slow");
+	    results++;
+	}
+	
 	function getTournamentState(){
 	    $("#players").html("<li>Players</li>");
+	    $("#results").html("");
 	    players = {};
 	    getPlayers();
 	}
@@ -50,8 +72,10 @@
 	    {
 	    case "player-joined":
 		addPlayer(message.id, message.name);
+		break;
 	    case "game-end":
-		logResult(message.player1, message.player2, result, board);
+		logResult(players[message.player1], players[message.player2], message.result, message.board);
+		break;
 	    }
 	};
 	
@@ -60,8 +84,13 @@
     <body onload="getTournamentState();">
     <div class="wrapper">
 	<div class="content">
-	    <div id="start" class="button" onclick="start()">Start</div>
-	    <div id="reset" class="button" onclick="reset()">Reset</div>
+	    <div id="controlBar">
+		<div id="title">4Play</div>
+		<div id="start" class="button" onclick="start()">Start</div>
+		<div id="reset" class="button" onclick="reset()">Reset</div>
+	    </div>
+	    
+	    <div id="results-wrapper"><ul id="results"></ul></div>
 	</div>
         <div class="nav">
 	    <ul id="players">
