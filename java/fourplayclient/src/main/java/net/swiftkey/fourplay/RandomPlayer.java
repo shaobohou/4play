@@ -18,7 +18,7 @@ public class RandomPlayer implements Player {
     
     @Override
     public int move(Board b) {
-        double startTime = System.currentTimeMillis();        
+        double startTime = System.currentTimeMillis();
 
         int[] counts = new int[b.countCols()];
         double[] scores = new double[b.countCols()];
