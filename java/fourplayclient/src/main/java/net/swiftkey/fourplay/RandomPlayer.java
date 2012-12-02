@@ -27,6 +27,9 @@ public class RandomPlayer implements Player {
             ArrayList<Integer> validCols = new ArrayList<Integer>();
             for (int col = 0; col < b.countCols(); ++col) {
                 if (b.nextRow(col)>=0) {
+                    if (b.willWin(col, 4, 1)) {
+                        return col;
+                    }
                     validCols.add(col);
                 }
             }
