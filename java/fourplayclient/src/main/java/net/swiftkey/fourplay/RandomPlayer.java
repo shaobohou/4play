@@ -25,19 +25,19 @@ public class RandomPlayer implements Player {
 
         try {
             // find all valid moves
-            ArrayList<Integer> validCols = new ArrayList<Integer>();
+            ArrayList<Integer> moves = new ArrayList<Integer>();
             for (int col = 0; col < b.countCols(); ++col) {
                 if (b.nextRow(col)>=0) {
+                    moves.add(col);
                     if (b.willWin(col, 4, 1)) {
                         return col;
                     }
-                    validCols.add(col);
                 }
             }
 
             // simulate moves
             for (int i = 0; i < mSamples; ++i) {
-                int col = validCols.get(mRandom.nextInt(validCols.size()));
+                int col = moves.get(mRandom.nextInt(moves.size()));
                 scores[col] += simulate(b.withMove(col).invert(), mDepth);
                 ++counts[col];
             }
@@ -52,42 +52,44 @@ public class RandomPlayer implements Player {
         int total = 0;
         for (int col = 0; col < b.countCols(); ++col) {
             if (counts[col]>0) {
-                scores[col] /= counts[col];
                 total += counts[col];
+                scores[col] /= counts[col];
                 if(best<0 || scores[col]>scores[best]) {
                     best = col;
                 }
             }
         }
 
-        double finishTime = System.currentTimeMillis();
-        System.out.println("took " + (finishTime-startTime) + " for " + total + " iterations");
-        System.out.println(Arrays.toString(scores));
+        // double finishTime = System.currentTimeMillis();
+        // System.out.println("took " + (finishTime-startTime) + " for " + total + " iterations");
+        // System.out.println(Arrays.toString(scores));
 
         if(best>=0) {
             return best;
         }
         
-        return mRandom.nextInt(b.countCols());
+        return mIdiot.move(b);
     }
 
     public double simulate(Board b, int depth) throws Exception {
-        for(int d = 0; d < depth; ++d) {
-            if(b.isComplete()) break;
+        // assume starting with the opponent
+        int score = 0;
 
-            // opponent move
-            int nextMove = mRandom.nextInt(b.countCols());
-            while(b.nextRow(nextMove)<0) { nextMove = mRandom.nextInt(b.countCols()); }
-            if (b.willWin(nextMove, 4, 1)) { return 0.0; }
+        // simulate equal numbers of moves for each player
+        for(int d = 0; d < depth*2; ++d) {
+            if(b.isComplete()) {
+                break;
+            }
+
+            // make any valid move
+            int nextMove = mIdiot.move(b);
+            if (b.willWin(nextMove, 4, 1)) {
+                return score;
+            }
+
+            // invert the board and the score for the opposing player
             b = b.withMove(nextMove).invert();
-
-            if(b.isComplete()) break;
-
-            // player move
-            nextMove = mRandom.nextInt(b.countCols());
-            while(b.nextRow(nextMove)<0) { nextMove = mRandom.nextInt(b.countCols()); }
-            if (b.willWin(nextMove, 4, 1)) { return 1.0; }
-            b = b.withMove(nextMove).invert();
+            score = 1-score;
         }
 
         // System.out.println(b.toString());
