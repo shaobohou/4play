@@ -17,9 +17,6 @@ public class Main
     // TODO - Plug in a different solver!
     private static Player mPlayer;
     private static Player iPlayer = new IdiotPlayer();
-    // private static Player bPlayer1 = new BrutePlayer(1);
-    // private static Player bPlayer2 = new BrutePlayer(2);
-    // private static Player bPlayer3 = new BrutePlayer(3);
     private static Player rPlayer = new RandomPlayer(10000, 10);
     private static Player mmPlayer1 = new MinimaxPlayer(1);
     private static Player mmPlayer2 = new MinimaxPlayer(2);
@@ -56,7 +53,7 @@ public class Main
         int[] scores = {0, 0, 0};
         try {
             for(int i = 0; i < 100; ++i) {
-                switch (deathMatch(tempBoard, mmPlayer3, rPlayer)) {
+                switch (deathMatch(tempBoard, mmPlayer1, mmPlayer2)) {
                 case -1: ++scores[0]; break;
                 case  0: ++scores[1]; break;
                 case  1: ++scores[2]; break;
