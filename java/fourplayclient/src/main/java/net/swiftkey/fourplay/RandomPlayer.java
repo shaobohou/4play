@@ -6,7 +6,6 @@ import java.util.Arrays;
 
 public class RandomPlayer implements Player {
 
-    Player mIdiot = new IdiotPlayer();
     Random mRandom = new Random();
     int mSamples = 10000;
     int mDepth = 10;
@@ -68,7 +67,16 @@ public class RandomPlayer implements Player {
             return best;
         }
         
-        return mIdiot.move(b);
+        return idiotMove(b);
+    }
+
+    public int idiotMove(Board b) {
+        int move = mRandom.nextInt(b.countCols());
+        while(b.nextRow(move)<0) {
+            move = mRandom.nextInt(b.countCols());
+        }
+
+        return move;
     }
 
     public double simulate(Board b, int depth) throws Exception {
@@ -82,7 +90,7 @@ public class RandomPlayer implements Player {
             }
 
             // make any valid move
-            int nextMove = mIdiot.move(b);
+            int nextMove = idiotMove(b);
             if (b.willWin(nextMove, 4, 1)) {
                 return score;
             }

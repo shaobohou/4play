@@ -8,7 +8,6 @@ import java.util.Arrays;
 
 public class MinimaxPlayer implements Player {
 
-    Player mIdiot = new IdiotPlayer();
     Random mRandom = new Random();
     int mDepth = 3;
 
@@ -63,9 +62,17 @@ public class MinimaxPlayer implements Player {
             System.out.println("Exception!");
         }
 
-        return mIdiot.move(b);
+        return idiotMove(b);
     }
 
+    public int idiotMove(Board b) {
+        int move = mRandom.nextInt(b.countCols());
+        while(b.nextRow(move)<0) {
+            move = mRandom.nextInt(b.countCols());
+        }
+
+        return move;
+    }
 
     int search(Board b, int depth, Map<String, Integer> cache) throws Exception {
         if(depth<=0) {
