@@ -1,18 +1,102 @@
+<!DOCTYPE html>
 <html>
     <head>
         <script src="jquery-1.7.1.min.js"></script>
+	<script src="jquery.gracefulWebSocket.js"></script>
+	<link rel="stylesheet" type="text/css" href="main.css" />
         <title>4play Tournament Master</title>
         <script>
+	    
+	var ws = $.gracefulWebSocket("ws://127.0.0.1:8080/websocket");
+	
+	var players = {};
+	    
+	function reset(){
+	    ws.send(JSON.stringify({message : "reset"}));
+	    getTournamentState();
+	}
+	
+	function start(){
+	    ws.send(JSON.stringify({message : "start"}))
+	}
+	
+	function addPlayer(id, name){
+	    players[id] = name;
+	    $("#players").append("<li style='display:none' id=player" + id + ">" + name + "</li>");
+	    $("#player" + id).fadeIn("slow");
+	}
+	
         function getPlayers (){
-        	$.get("/tournament/players", function (data){
-        		$.each(data, function (datum){
-        			players.append
-        		})
+            $.getJSON("/tournament/players", function (data){
+        	    $.each(data, function (id){
+			addPlayer(id, data[id].name);
+        	    })
         	})
         }
+	
+	var results = 0;
+	
+	function logResult(player1, player2, result, board){
+	    var message = "";
+	    
+	    switch(result)
+	    {
+		case 0:
+		    message = player1 + " drew with " + player2;
+		case 1:
+		    message = player1 + " beat " + player2;
+		case -1:
+		    message = player2 + " beat " + player1;
+		
+	    }
+	    
+	    $("#results").prepend("<li style='display:none' id=results" + results + ">" + message + "</li>");
+	    $("#results" + results).fadeIn("slow");
+	    results++;
+	}
+	
+	function getTournamentState(){
+	    $("#players").html("<li>Players</li>");
+	    $("#results").html("");
+	    players = {};
+	    getPlayers();
+	}
+	
+	
+	ws.onmessage = function (event) {
+	    var data = JSON.parse(event.data);
+	    var type = data["type"];
+	    var message = data["message"];
+	    
+	    switch(type)
+	    {
+	    case "player-joined":
+		addPlayer(message.id, message.name);
+		break;
+	    case "game-end":
+		logResult(players[message.player1], players[message.player2], message.result, message.board);
+		break;
+	    }
+	};
+	
         </script>
     </head>
-    <body onload="">
-       <div id="playersDiv"><ul id="players"></ul></div>
+    <body onload="getTournamentState();">
+    <div class="wrapper">
+	<div class="content">
+	    <div id="controlBar">
+		<div id="title">4Play</div>
+		<div id="start" class="button" onclick="start()">Start</div>
+		<div id="reset" class="button" onclick="reset()">Reset</div>
+	    </div>
+	    
+	    <div id="results-wrapper"><ul id="results"></ul></div>
+	</div>
+        <div class="nav">
+	    <ul id="players">
+		<li>Players</li>
+	    </ul>
+	</div>
+    </div>
     </body>
 </html>

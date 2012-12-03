@@ -1,5 +1,13 @@
 (ns fourplayserver.tournament
-  (:require [fourplayserver.java-interop :as board]))
+  (:require [cheshire.core :as json]
+            [fourplayserver.java-interop :as board]
+            [fourplayserver.models.socket-connections :refer [connections]]))
+
+(defn send-socket-message
+  [type message]
+  (doseq [connection @connections]
+    (println message)
+    (.send connection (json/generate-string {:type type :message message}))))
 
 (defonce tournament (ref {:running false :players {} :results {}}))
 
@@ -60,6 +68,15 @@
                                       {player-id {:state :PLAYING :last-opp opp-id}
                                        opp-id {:state :PLAYING :last-opp player-id}}))))))))
 
+(defn send-socket-end-game
+  [game result]
+  (when-not (:socketed game)
+    (send-socket-message "game-end" {:player1 (:player1 game) 
+                                     :player2 (:player2 game)
+                                     :result result
+                                     :board (board/serialize-board (:board game))})
+    (alter games #(update-in % [(:id game)] assoc :socketed true))))
+
 (defn poll
   [{id :id}]
   (dosync
@@ -77,18 +94,37 @@
               (throw (IllegalArgumentException. "Unregistered player id"))
               (= 1 board-state)
               (if (= (:player1 game) player-id)
-                (do (conclude-game! player-id (:player2 game) 1) {:state "WON" :board (board/serialize-board board)})
-                (do (conclude-game! player-id (:player2 game) -1) {:state "LOST" :board (board/serialize-board board)}))
+                (do 
+                  (conclude-game! player-id (:player2 game) 1)
+                  (send-socket-end-game game board-state)
+                  {:state "WON" :board (board/serialize-board board)})
+                (do 
+                  (conclude-game! player-id (:player2 game) -1)
+                  (send-socket-end-game game board-state)
+                  {:state "LOST" :board (board/serialize-board board)}))
               (= -1 board-state)
               (if (= (:player2 game) player-id)
-                (do (conclude-game! player-id (:player1 game) 1) {:state "WON" :board (board/flip-board (board/serialize-board board))})
-                (do (conclude-game! player-id (:player1 game) -1) {:state "LOST" :board (board/flip-board (board/serialize-board board))}))
+                (do 
+                  (conclude-game! player-id (:player1 game) 1)
+                  (send-socket-end-game game board-state)
+                  {:state "WON" :board (board/serialize-board (board/flip-board board)) })
+                (do 
+                  (conclude-game! player-id (:player1 game) -1)
+                  (send-socket-end-game game board-state)
+                  {:state "LOST" :board (board/serialize-board (board/flip-board board)) }))
               (= :DRAW board-state)
               (if (= (:player1 game) player-id) 
-                (do (conclude-game! player-id (:player2 game) 0) {:state "DRAW" :board (board/flip-board (board/serialize-board board))})
-                (do (conclude-game! player-id (:player1 game) 0) {:state "DRAW" :board (board/flip-board (board/serialize-board board))}))
+                (do
+                  (conclude-game! player-id (:player2 game) 0)
+                  (send-socket-end-game game 0)
+                  {:state "DRAW" :board (board/serialize-board board)})
+                (do
+                  (conclude-game! player-id (:player1 game) 0)
+                  (send-socket-end-game game 0)
+                  {:state "DRAW" :board (board/serialize-board (board/flip-board board)) }))
               :else ;in play
-              (let [board-inner (if (= (:player2 game) player-id) (board/flip-board (board/serialize-board board)) (board/serialize-board board))]
+              (let [board-inner (if (= (:player2 game) player-id) (board/serialize-board (board/flip-board board)) (board/serialize-board board))]
+                (println board-inner)
                 (if (= (:whosnext game) player-id)
                   {:state "MOVE" :board board-inner}
                   {:state "WAIT" :board board-inner})))))
@@ -111,7 +147,9 @@
               board-state (board/get-board-state board)]
           (if (= :PLAY board-state)
             (if (= (:whosnext game) player-id)
-              (let [new-board (board/make-move board move-col)]
+              (let [new-board (if (= (:player1 game) player-id)
+                                (board/make-move board move-col)
+                                (board/flip-board (board/make-move (board/flip-board board) move-col)))]
                 (update-game! game new-board))
               (throw (IllegalArgumentException. "It isn't your move!")))
             (throw (IllegalArgumentException. "Game is already over!"))))))
@@ -125,7 +163,9 @@
     (throw (IllegalArgumentException. "Tournament has already started!"))
     (if (< (count (:players @tournament)) 3)
       (throw (IllegalArgumentException. "Not enough players"))
-      (dosync (alter tournament (fn [t] (assoc t :running true)))))))
+      (do 
+        (send-socket-message "tournament-started" "")
+        (dosync (alter tournament (fn [t] (assoc t :running true))))))))
 
 (defn join
   [{name :name}]
@@ -134,6 +174,7 @@
     (if name
       (dosync
         (let [player-id (inc (count (get @tournament :players)))]
+          (send-socket-message "player-joined" {:id player-id :name name})
           (alter tournament (fn [t] 
                               (assoc t 
                                      :players (assoc (:players t) player-id {:name name :state :WAIT :last-opp nil
