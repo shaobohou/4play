@@ -1,4 +1,6 @@
-package net.swiftkey.fourplay;
+package net.swiftkey.fourplay.bots;
+
+import net.swiftkey.fourplay.Board;
 
 /**
  * Implement this interface to solve Connect 4 games.

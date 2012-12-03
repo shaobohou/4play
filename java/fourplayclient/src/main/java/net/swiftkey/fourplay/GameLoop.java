@@ -1,5 +1,7 @@
 package net.swiftkey.fourplay;
 
+import net.swiftkey.fourplay.bots.Player;
+
 public class GameLoop {
 	private static final int POLL_INTERVAL_MS = 50;
 
