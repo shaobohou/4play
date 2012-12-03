@@ -45,9 +45,9 @@ public class MinimaxPlayer implements Player {
                 }
             }
 
-            // System.out.println(Arrays.toString(scores));
-            // double finishTime = System.currentTimeMillis();
-            // System.out.println("took " + (finishTime-startTime));
+            System.out.println(Arrays.toString(scores));
+            double finishTime = System.currentTimeMillis();
+            System.out.println("took " + (finishTime-startTime));
 
             ArrayList<Integer> moves = new ArrayList<Integer>();
             if (best>=0) {
@@ -68,7 +68,7 @@ public class MinimaxPlayer implements Player {
 
 
     int search(Board b, int depth, Map<String, Integer> cache) throws Exception {
-        if(depth<0) {
+        if(depth<=0) {
             return 0;
         }
 
