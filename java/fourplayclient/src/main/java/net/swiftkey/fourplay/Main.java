@@ -15,9 +15,16 @@ public class Main
     private static ServiceStub mServer = new ServiceStub("127.0.0.1", 3000);
 	
     // TODO - Plug in a different solver!
+    private static Player mPlayer;
     private static Player iPlayer = new IdiotPlayer();
-    private static Player bPlayer = new BrutePlayer(2);
+    // private static Player bPlayer1 = new BrutePlayer(1);
+    // private static Player bPlayer2 = new BrutePlayer(2);
+    // private static Player bPlayer3 = new BrutePlayer(3);
     private static Player rPlayer = new RandomPlayer(10000, 10);
+    private static Player mmPlayer1 = new MinimaxPlayer(1);
+    private static Player mmPlayer2 = new MinimaxPlayer(2);
+    private static Player mmPlayer3 = new MinimaxPlayer(3);
+    private static Player mmPlayer4 = new MinimaxPlayer(4);
 
     private static GameState mState = null;
     private static int mCurrentGameId = -1;
@@ -36,12 +43,20 @@ public class Main
         // Board tempBoard = new Board(state, 6, 7);
 
         Board tempBoard = new Board(new int[42], 6, 7);
-        System.out.println(rPlayer.move(tempBoard));
+        try {
+            System.out.println(rPlayer.move(tempBoard));
+            System.out.println(mmPlayer2.move(tempBoard.withMove(3).withMove(4)));
+        } catch (Exception e) {
+            System.out.println("Exception in the main testing code!");
+        }
+
+        System.out.println(mmPlayer3.move(tempBoard));
+        // System.exit(1);
 
         int[] scores = {0, 0, 0};
         try {
             for(int i = 0; i < 100; ++i) {
-                switch (deathMatch(tempBoard, bPlayer, rPlayer)) {
+                switch (deathMatch(tempBoard, mmPlayer3, rPlayer)) {
                 case -1: ++scores[0]; break;
                 case  0: ++scores[1]; break;
                 case  1: ++scores[2]; break;
@@ -145,7 +160,7 @@ public class Main
     }
 	
     private static void handleMove() {
-        int move = bPlayer.move(mState.getBoard());
+        int move = mPlayer.move(mState.getBoard());
         mServer.moveTournament(mCurrentGameId, move);
         mState = GameState.WAIT_STATE;
         System.out.println("handleMove: move=" + move);
