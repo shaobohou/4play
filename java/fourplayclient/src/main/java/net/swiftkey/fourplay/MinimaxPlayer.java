@@ -2,6 +2,8 @@ package net.swiftkey.fourplay;
 
 import java.util.Random;
 import java.util.ArrayList;
+import java.util.Map;
+import java.util.HashMap;
 import java.util.Arrays;
 
 public class MinimaxPlayer implements Player {
@@ -9,6 +11,8 @@ public class MinimaxPlayer implements Player {
     Player mIdiot = new IdiotPlayer();
     Random mRandom = new Random();
     int mDepth = 3;
+
+    private static int cacheDepth = 5;
 
     public MinimaxPlayer(int depth) {
         mDepth = depth;
@@ -19,6 +23,7 @@ public class MinimaxPlayer implements Player {
         double startTime = System.currentTimeMillis();
 
         int[] scores = new int[b.countCols()];
+        Map<String, Integer> cache = new HashMap<String, Integer>(10000);
 
         try {
             // find all valid moves
@@ -33,16 +38,16 @@ public class MinimaxPlayer implements Player {
                     }
 
                     // minimax search
-                    scores[col] = -search(b.withMove(col).invert(), mDepth*2-1);
+                    scores[col] = -search(b.withMove(col).invert(), mDepth*2-1, cache);
                     if (best<0 || scores[col]>scores[best]) {
                         best = col;
                     }
                 }
             }
 
-            // System.out.println(Arrays.toString(scores));
-            // double finishTime = System.currentTimeMillis();
-            // System.out.println("took " + (finishTime-startTime));
+            System.out.println(Arrays.toString(scores));
+            double finishTime = System.currentTimeMillis();
+            System.out.println("took " + (finishTime-startTime));
 
             ArrayList<Integer> moves = new ArrayList<Integer>();
             if (best>=0) {
@@ -62,10 +67,22 @@ public class MinimaxPlayer implements Player {
     }
 
 
-    int search(Board b, int depth) throws Exception {
+    int search(Board b, int depth, Map<String, Integer> cache) throws Exception {
         if(depth<0) {
             return 0;
         }
+
+        // if((mDepth*2-depth)<=cacheDepth) {
+        //     String boardKey = b.toString();
+        //     String otherKey = b.invert().toString();
+
+        //     Integer cachedScore = null;
+        //     if((cachedScore=cache.get(boardKey))!=null) {
+        //         return  cachedScore;
+        //     } else if((cachedScore=cache.get(otherKey))!=null) {
+        //         return -cachedScore;
+        //     }
+        // }
 
         for (int col = 0; col < b.countCols(); ++col) {
             if (b.nextRow(col)>=0) {
@@ -79,8 +96,8 @@ public class MinimaxPlayer implements Player {
         int[] scores = new int[b.countCols()];
         for (int col = 0; col < b.countCols(); ++col) {
             scores[col] = -999;
-            if (b.nextRow(col)>0) {
-                scores[col] = -search(b.withMove(col).invert(), depth-1);
+            if (b.nextRow(col)>=0) {
+                scores[col] = -search(b.withMove(col).invert(), depth-1, cache);
                 if (best<0 || scores[col]>scores[best]) {
                     best = col;
                 }
@@ -88,6 +105,12 @@ public class MinimaxPlayer implements Player {
         }
 
         if (best>=0) {
+            // if((mDepth*2-depth)<=cacheDepth) {
+            //     if(!cache.containsKey(b.toString()) && !cache.containsKey(b.invert().toString())) {
+            //         cache.put(b.toString(), scores[best]);
+            //     }
+            // }
+
             return scores[best];
         }
 

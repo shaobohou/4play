@@ -73,7 +73,7 @@ public class RandomPlayer implements Player {
 
     public double simulate(Board b, int depth) throws Exception {
         // assume starting with the opponent
-        int score = 0;
+        double score = 0;
 
         // simulate equal numbers of moves for each player
         for(int d = 0; d < depth*2; ++d) {
