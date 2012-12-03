@@ -77,36 +77,83 @@
         	})
         }
 	
-	var results = 0;
-	
 	function logResult(player1, player2, result, board){
 	    var message = "";
 	    
 	    var putDown = putDowns[Math.floor(Math.random()*putDowns.length)]
 	    
-	    var player1Span = "<span class='player" + player1 + "'>" + players[player1] + "</span>";
-	    var player2Span = "<span class='player" + player2 + "'>" + players[player2] + "</span>";
+	    var player1elem = "<td class='player" + player1 + "'>" + players[player1] + "</td>";
+	    var player2elem = "<td class='player" + player2 + "'>" + players[player2] + "</td>";
 	    
 	    switch(result)
 	    {
 		case 0:
-		    message = player1Span + " drew with " + player2Span;
+		    message = player1elem + "<td>drew with</td>" + player2elem;
 		case 1:
-		    message = player1Span + " " + putDown + " " + player2Span;
+		    message = player1elem + "<td class='putdown'>" + putDown + "</td>" + player2elem;
 		case -1:
-		    message = player2Span + " " + putDown + " " + player1Span;
+		    message = player2elem + "<td class='putdown'>" + putDown + "</td>" + player1elem;
 		
 	    }
 	    
-	    $("#results").prepend("<li style='display:none' id=results" + results + ">" + message + "</li>");
-	    $("#results" + results).fadeIn("slow");
-	    results++;
+	    $("#results").prepend(
+		$('<tr>')
+		    .hide()
+		    .html(message)
+		    .fadeIn('slow')
+		    .click(function() {
+			var t = $('<div/>')
+				    .css('font-size', '300px')
+				    .css('top', '200px')
+				    .css('position', 'fixed')
+				    .css('-webkit-transform', 'rotate(-45deg)')
+				    .text(putDown);
+				    
+			$('body')
+			    .append(t);
+			    
+			t.fadeOut('slow', function() {
+			    $(this).remove();
+			});
+		    })
+	    );
+	    
+	    $("#results tr").slice(20).remove();
 	    
 	    renderBoardState(board.state);
 	}
 	
+	function SortByScore(a, b){
+	    return ((a.score < b.score) ? 1 : ((a.score > b.score) ? -1 : 0));
+	}
+	
 	function renderLeaderBoard(playersInfo){
+	    var playerStates = [];
+	    $("#leaderBoardTBody").html("");
+	    $.each(playersInfo, function(id){
+		var playerState = playersInfo[id];
+		playerState.id = id;
+		playerState.score = playersInfo[id]["games-won"]/playersInfo[id]["games-played"];
+		playerStates.push(playerState);
+	    })
 	    
+	    playerStates = playerStates.sort(SortByScore);
+	    
+	    $.each(playerStates, function (id){
+		var playerState = playerStates[id];
+		var t = $('<tr/>')
+		
+		$("#leaderBoardTBody").append(t);
+		
+		
+		t.append($('<td/>').html(playerState["name"]).attr("class", "player" + playerState.id));
+		t.append($('<td/>').html(playerState["games-played"]));
+		t.append($('<td/>').html(playerState["games-won"]));
+		t.append($('<td/>').html(playerState["games-lost"]));
+		t.append($('<td/>').html(playerState["games-drawn"]));
+		t.append($('<td/>').html(Math.round (playerState["score"] * 1000) / 1000));
+		
+	    });
 	}
 	
 	function getResults(){
@@ -140,7 +187,7 @@
 		logResult(message.player1, message.player2, message.result, message.board);
 		break;
 	    case "state":
-		console.log(message);
+		renderLeaderBoard(message);
 		break;
 	    }
 	};
@@ -156,14 +203,24 @@
 		<div id="reset" class="button" onclick="reset()">Reset</div>
 	    </div>
 	    
-	    <div id="results-wrapper"><ul id="results"></ul></div>
+	    <div id="results-wrapper"><table id="results"><tbody></tbody></table></div>
 	    <div id="board"></div>
 	    <div id="leaderBoard">
-		<ul id="source">
-		    <li data-id="iphone">iOS</li>
-		    <li data-id="android">Android</li>
-		    <li data-id="winmo">Windows Phone 7</li>
-		</ul>
+		<table>
+		    <thead>
+			<tr>
+			    <th>Name</th>
+			    <th>Played</th>
+			    <th>W</th>
+			    <th>L</th>
+			    <th>D</th>
+			    <th>Score</th>
+			</tr>
+		    </thead>
+		    <tbody id="leaderBoardTBody">
+			
+		    </tbody>
+		</table>
 	    </div>
 	</div>
         <div class="nav">

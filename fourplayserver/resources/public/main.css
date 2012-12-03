@@ -65,24 +65,21 @@ body{
   display:inline-block;
 }
 
-#results-wrapper > ul{
-  list-style-type:none;
-  padding-left: 0px;
+#results-wrapper > table {
+    width: 100%;
+    border-collapse: collapse;
 }
 
-#results-wrapper > ul > li {
-     background-color: white;
-     padding:0.5em;
-     margin:0;
-     margin-bottom:0.5em;
-     border-radius: 10px;
-     text-align: left;
-     color: darkslategrey;
-     width:93%;
+#results-wrapper tr {
+    border-bottom: 1px solid white;
 }
 
-#results-wrapper > ul > li > * {
-    padding:0.2em;
+#results-wrapper td {
+    padding:0.6em;
+}
+
+#results-wrapper .putdown {
+    text-align: center;
 }
 
 .button{
@@ -132,15 +129,15 @@ body{
     list-style-type:none;
 }
 
-#leaderBoard > ul > li{
+#leaderBoard td {
     margin:5px;
     padding:0.5em;
-    border: 1px solid black;
 }
 
 .player1 { background-color: #3D0000; color: white;}
 .player2 { background-color: #DC0100; color: white;}
 .player3 { background-color: #FF6C00; color: white;}
 .player4 { background-color: #FFDA8E; color: black;}
-.player5 { background-color: #949EA5; }
+.player5 { background-color: #949EA5; color: black;}
+
 
