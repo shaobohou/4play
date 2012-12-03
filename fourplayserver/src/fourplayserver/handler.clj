@@ -46,5 +46,7 @@
     (cond
       (= "reset" message)
       (do (println "RESET") (tournament/reset {}))
+      (= "state" message)
+      (do (println "STATE") (tournament/state {}))
       (= "start" message)
       (do (println "START") (tournament/start {})))))

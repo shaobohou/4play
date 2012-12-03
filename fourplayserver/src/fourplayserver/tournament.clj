@@ -6,7 +6,6 @@
 (defn send-socket-message
   [type message]
   (doseq [connection @connections]
-    (println message)
     (.send connection (json/generate-string {:type type :message message}))))
 
 (defonce tournament (ref {:running false :players {} :results {}}))
@@ -36,6 +35,7 @@
   (let [result-map (cond 
                      (= 1 result) {:games-played 1 :games-won 1}
                      (= -1 result) {:games-played 1 :games-lost 1}
+                     (= 0 result) {:games-played 1 :games-drawn 1}
                      :else {:game-played 1})]
   (merge-with + (assoc player :state :WAIT) result-map)))
 
@@ -75,6 +75,7 @@
                                      :player2 (:player2 game)
                                      :result result
                                      :board (board/serialize-board (:board game))})
+    (send-socket-message "state" (get @tournament :players))
     (alter games #(update-in % [(:id game)] assoc :socketed true))))
 
 (defn poll
@@ -99,7 +100,7 @@
                   (send-socket-end-game game board-state)
                   {:state "WON" :board (board/serialize-board board)})
                 (do 
-                  (conclude-game! player-id (:player2 game) -1)
+                  (conclude-game! player-id (:player1 game) -1)
                   (send-socket-end-game game board-state)
                   {:state "LOST" :board (board/serialize-board board)}))
               (= -1 board-state)
@@ -109,7 +110,7 @@
                   (send-socket-end-game game board-state)
                   {:state "WON" :board (board/serialize-board (board/flip-board board)) })
                 (do 
-                  (conclude-game! player-id (:player1 game) -1)
+                  (conclude-game! player-id (:player2 game) -1)
                   (send-socket-end-game game board-state)
                   {:state "LOST" :board (board/serialize-board (board/flip-board board)) }))
               (= :DRAW board-state)
@@ -178,7 +179,8 @@
           (alter tournament (fn [t] 
                               (assoc t 
                                      :players (assoc (:players t) player-id {:name name :state :WAIT :last-opp nil
-                                                                             :games-played 0 :games-won 0 :games-lost 0}))))
+                                                                             :games-played 0 :games-won 0 :games-lost 0
+                                                                             :games-drawn 0}))))
           {:id player-id}))
       (throw (IllegalArgumentException. "Name required")))))
 
@@ -194,7 +196,7 @@
 
 (defn state
   [args]
-  {:games-played (/ (reduce (fn [acc p] (+ acc (:games-played p))) 0 (get @tournament :players)) 2)
+  (println @tournament)
+  {:results (:results @tournament)
    :players (:players @tournament)
-   :results (:results @tournament)
    :running (:running @tournament)})

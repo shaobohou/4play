@@ -3,9 +3,52 @@
     <head>
         <script src="jquery-1.7.1.min.js"></script>
 	<script src="jquery.gracefulWebSocket.js"></script>
+	<script src="jquery.quicksand.js"></script>
 	<link rel="stylesheet" type="text/css" href="main.css" />
         <title>4play Tournament Master</title>
         <script>
+	    
+	var rows=8;
+	var cols=8;
+	var height = 400;
+        var width = 400;
+	
+	var putDowns = ["beat", "smashed", "schooled",
+			"destroyed", "whitewashed", "learned",
+			"hammered", "pummeled", "spanked",
+			"trounced", "slaughtered", "pwned",
+			"defeated", "bamboozled", "connect4d",
+			"carted", "laid the smackdown on",
+			"crushed", "flattened", "KO'd",
+			"annihilated", "burned", "checkmated",
+			"yahtzee'd", "wrecked", "walked over",
+			"rinsed", "is more evolved than", "licked",
+			"trashed", ">"]
+	    
+	function drawEmptyBoard(){
+                var svg = '<svg id="svg" xmlns="http://www.w3.org/2000/svg" version="1.1" height="' + height +'" width="' + width + '">'
+		svg = svg + '<rect width="' + width + '" height="' + height + '" style="fill:rgb(60,60,255);"/>';
+                for(i=0;i<cols;i++){
+                    for(j=0;j<rows;j++){
+                        var cx = ((i * (width / cols)) + ((width / cols) / 2));
+                        var cy = height - ((j * (height / rows)) + ((height / rows) / 2));
+                        svg = svg + '<circle class="circle" id="circle' + (i + (cols * j)) + '" cx="' + cx + '" cy="' + cy + '" r="20" stroke="blue" stroke-width="2" fill="white" />';
+                    }
+                }
+                svg = svg + '</svg>';
+                $("#board").append(svg);
+            }
+            
+            function renderBoardState(board){
+                $(".circle").attr("fill", "white");
+                for(i=0;i<board.length;i++){
+                    if(board[i] == 1){
+                        $("#circle" + i).attr("fill", "#f22");
+                    }else if(board[i] == -1){
+                        $("#circle" + i).attr("fill", "#fd2");
+                    }
+                }
+            }
 	    
 	var ws = $.gracefulWebSocket("ws://127.0.0.1:8080/websocket");
 	
@@ -22,7 +65,7 @@
 	
 	function addPlayer(id, name){
 	    players[id] = name;
-	    $("#players").append("<li style='display:none' id=player" + id + ">" + name + "</li>");
+	    $("#players").append("<li class='player" + id + "' style='display:none' id=player" + id + ">" + name + "</li>");
 	    $("#player" + id).fadeIn("slow");
 	}
 	
@@ -39,27 +82,47 @@
 	function logResult(player1, player2, result, board){
 	    var message = "";
 	    
+	    var putDown = putDowns[Math.floor(Math.random()*putDowns.length)]
+	    
+	    var player1Span = "<span class='player" + player1 + "'>" + players[player1] + "</span>";
+	    var player2Span = "<span class='player" + player2 + "'>" + players[player2] + "</span>";
+	    
 	    switch(result)
 	    {
 		case 0:
-		    message = player1 + " drew with " + player2;
+		    message = player1Span + " drew with " + player2Span;
 		case 1:
-		    message = player1 + " beat " + player2;
+		    message = player1Span + " " + putDown + " " + player2Span;
 		case -1:
-		    message = player2 + " beat " + player1;
+		    message = player2Span + " " + putDown + " " + player1Span;
 		
 	    }
 	    
 	    $("#results").prepend("<li style='display:none' id=results" + results + ">" + message + "</li>");
 	    $("#results" + results).fadeIn("slow");
 	    results++;
+	    
+	    renderBoardState(board.state);
+	}
+	
+	function renderLeaderBoard(playersInfo){
+	    
+	}
+	
+	function getResults(){
+	    $.getJSON("/tournament/state", function (data){
+        	    renderLeaderBoard(data.players);
+        	})
 	}
 	
 	function getTournamentState(){
-	    $("#players").html("<li>Players</li>");
+	    $("#players").html("");
 	    $("#results").html("");
+	    $("#board").html("");
 	    players = {};
 	    getPlayers();
+	    drawEmptyBoard();
+	    getResults();
 	}
 	
 	
@@ -74,7 +137,10 @@
 		addPlayer(message.id, message.name);
 		break;
 	    case "game-end":
-		logResult(players[message.player1], players[message.player2], message.result, message.board);
+		logResult(message.player1, message.player2, message.result, message.board);
+		break;
+	    case "state":
+		console.log(message);
 		break;
 	    }
 	};
@@ -91,10 +157,17 @@
 	    </div>
 	    
 	    <div id="results-wrapper"><ul id="results"></ul></div>
+	    <div id="board"></div>
+	    <div id="leaderBoard">
+		<ul id="source">
+		    <li data-id="iphone">iOS</li>
+		    <li data-id="android">Android</li>
+		    <li data-id="winmo">Windows Phone 7</li>
+		</ul>
+	    </div>
 	</div>
         <div class="nav">
 	    <ul id="players">
-		<li>Players</li>
 	    </ul>
 	</div>
     </div>
