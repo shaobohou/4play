@@ -93,7 +93,7 @@
             (cond 
               (nil? game)
               (throw (IllegalArgumentException. "Unregistered player id"))
-              (= 1 board-state)
+              (= 1 board-state) ; PLAYER1 WIN
               (if (= (:player1 game) player-id)
                 (do 
                   (conclude-game! player-id (:player2 game) 1)
@@ -103,7 +103,7 @@
                   (conclude-game! player-id (:player1 game) -1)
                   (send-socket-end-game game board-state)
                   {:state "LOST" :board (board/serialize-board board)}))
-              (= -1 board-state)
+              (= -1 board-state); PLAYER2 WIN
               (if (= (:player2 game) player-id)
                 (do 
                   (conclude-game! player-id (:player1 game) 1)

@@ -3,7 +3,8 @@
             [compojure.route :as route]
             [compojure.core :refer :all]
             [fourplayserver.tournament :as tournament]
-            [cheshire.core     :refer [generate-string parse-string]]))
+            [cheshire.core     :refer [generate-string parse-string]])
+  (:import [net.swiftkey.fourplay Main]))
 
 (defn wrap-exceptions [app]
   (fn [req] (try (app req)
@@ -49,4 +50,6 @@
       (= "state" message)
       (do (println "STATE") (tournament/state {}))
       (= "start" message)
-      (do (println "START") (tournament/start {})))))
+      (do (println "START") (tournament/start {}))
+      (= "add-player" message)
+      (future (Main/main (into-array String []))))))
