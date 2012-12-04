@@ -1,10 +1,10 @@
 package net.swiftkey.fourplay.bots;
 
-import java.util.Random;
 import java.util.ArrayList;
-import java.util.Map;
 import java.util.HashMap;
-import java.util.Arrays;
+import java.util.Map;
+import java.util.Random;
+
 import net.swiftkey.fourplay.Board;
 
 public class MinimaxPlayer implements Player {
