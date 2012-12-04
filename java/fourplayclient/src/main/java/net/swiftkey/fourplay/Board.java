@@ -56,6 +56,25 @@ public class Board
         this.numRows = numRows;
         this.numCols = numCols;
     }
+
+    /**
+     * Construct an empty board of default dimensions.
+     */
+    public static Board empty() {
+        return empty(DEFAULT_ROWS, DEFAULT_COLS);
+    }
+    
+    /**
+     * Construct and return an empty board of given dimensions.
+     */
+    public static Board empty(int numRows, int numCols) {
+        int[] state = new int[numRows * numCols];
+        for(int i = 0; i < state.length; ++i) {
+            state[i] = 0;
+        }
+        
+        return new Board(state, numRows, numCols);
+    }
     
     /**
      * Return the board state as an array of integers.
@@ -368,4 +387,21 @@ public class Board
         
         return false;
     }
+    
+    /**
+     * Invert the board to reflect the opponent's point of view.
+     * Note - returns new instance of Board, this is unmodified.
+     * 
+     * @return New Board instance reflecting opponent's point 
+     *         of view.
+     */
+    public Board invert() {
+        int[] state = this.serializeBoard().clone();
+        for(int i = 0; i < state.length; ++i) {
+            state[i] *= -1;
+        }
+        
+        return new Board(state, this.numRows, this.numCols);
+    }
+    
 }

@@ -15,7 +15,19 @@ import org.apache.commons.cli.PosixParser;
 
 public class Main {
 	
-	private static void playGame(CommandLine cmd) {
+    private static void playTrainingGame(CommandLine cmd) {
+        String oppName = cmd.getOptionValue("t");
+        String botName = cmd.hasOption("b") ? cmd.getOptionValue("b") : "idiot";
+        int ngames = Integer.parseInt(cmd.hasOption("n") ? cmd.getOptionValue("n") : "100");
+        
+        Player opponent = Bots.sBots.get(oppName);
+        Player bot = Bots.sBots.get(botName);
+        
+        TrainingGame game = new TrainingGame(bot, opponent);
+        game.play(ngames);
+    }
+    
+    private static void playGame(CommandLine cmd) {
 		String host = cmd.hasOption("s") ? cmd.getOptionValue("s") : "localhost";
 		int port = Integer.parseInt(cmd.hasOption("p") ? cmd.getOptionValue("p") : "3000");
 		String botName = cmd.hasOption("b") ? cmd.getOptionValue("b") : "idiot";
@@ -45,6 +57,7 @@ public class Main {
 		options.addOption("b", "bot", true, "name of the bot class to play as, see Bots class");
 		options.addOption("n", "ngames", true, "number of games to play");
 		options.addOption("a", "alias", true, "the player name to register with the server");
+        options.addOption("t", "train", true, "name of a bot to train against locally (host/port ignored)");
 		
 		CommandLineParser parser = new PosixParser();
 		try {
@@ -57,6 +70,8 @@ public class Main {
 						     options, 
 						     "See net.swiftkey.fourplay.bots.Bots for available bot options.");
 				System.exit(0);
+			} else if (cmd.hasOption("t")) {
+			    playTrainingGame(cmd);
 			} else {
 				playGame(cmd);
 			}

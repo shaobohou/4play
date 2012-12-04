@@ -10,7 +10,15 @@ public class IdiotPlayer implements Player {
 	
 	@Override
 	public int move(Board b) {
-		return mRandom.nextInt(b.countCols());
+	    int row = -1;
+	    int col = -1;
+	    
+	    while (row == -1) {
+	        col = mRandom.nextInt(b.countCols());
+	        row = b.nextRow(col);
+	    }
+	    
+		return col;
 	}
 
 }
