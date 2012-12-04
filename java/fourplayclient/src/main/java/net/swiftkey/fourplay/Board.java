@@ -354,15 +354,16 @@ public class Board
                 return true;
             }
         }
-        
-        // This is unnecessary, could be much faster!
+
+        // Just checking the "top" tokens, as those are
+        // the only ones that could have been the previous
+        // move
         for (int x = 0; x < this.numCols; ++x) {
-            for (int y = 0; y < this.numRows; ++y) {
-                if ((winningPiece(getDiagonal(x, y, 1, 1), winLength) == player)
-                 || (winningPiece(getDiagonal(x, y, 1, -1), winLength) == player)) {
-                    return true;
+            int y = Math.max(nextRow(x) - 1, 0);
+            if ((winningPiece(getDiagonal(x, y, 1, 1), winLength) == player)
+                    || (winningPiece(getDiagonal(x, y, 1, -1), winLength) == player)) {
+                return true; 
                 }
-            }
         }
         
         return false;
