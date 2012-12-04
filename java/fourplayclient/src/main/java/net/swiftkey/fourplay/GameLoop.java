@@ -65,7 +65,6 @@ public class GameLoop {
 		mCurrentGameId = mServer.joinTournament(mPlayerName);
 		mState = GameState.WAIT_STATE;
 
-		System.out.println("startNewGame: gameId=" + mCurrentGameId);
 	}
 	
 	private void handleWait() {
@@ -76,31 +75,26 @@ public class GameLoop {
 		}
 		mState = mServer.pollTournament(mCurrentGameId);
 		
-		System.out.println("handleWait: " + mState.toString());
 	}
 	
 	private void handleMove() {
 		int move = mPlayer.move(mState.getBoard());
 		mServer.moveTournament(mCurrentGameId, move);
 		mState = GameState.WAIT_STATE;
-		System.out.println("handleMove: move=" + move);
 	}
 	
 	private void handleWin() {
 		mWinCount += 1;
 		mState = GameState.WAIT_STATE;
-		System.out.println("handleWin: mWinCount=" + mWinCount);
 	}
 	
 	private void handleLose() {
 		mLoseCount += 1;
         mState = GameState.WAIT_STATE;
-		System.out.println("handleLose: mLoseCount=" + mLoseCount);
 	}
 	
 	private void handleDraw() {
 		mDrawCount += 1;
         mState = GameState.WAIT_STATE;
-		System.out.println("handleDraw: mDrawCount=" + mDrawCount);
 	}
 }

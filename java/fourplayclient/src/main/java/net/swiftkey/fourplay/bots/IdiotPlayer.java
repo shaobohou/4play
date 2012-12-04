@@ -1,9 +1,7 @@
 package net.swiftkey.fourplay.bots;
 
 import java.util.Random;
-
 import net.swiftkey.fourplay.Board;
-
 public class IdiotPlayer implements Player {
 
 	Random mRandom = new Random();

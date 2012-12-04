@@ -6,6 +6,7 @@
   
   :dependencies [[ring/ring-jetty-adapter "1.1.6"]
                  [org.clojure/clojure "1.4.0"]
+                 [org.clojure/math.combinatorics "0.0.3"]
                  [compojure "1.1.1"]
                  [cheshire "4.0.1"]
                  [com.google.code.gson/gson "2.2.2"]
@@ -14,6 +15,7 @@
                  [org.apache.httpcomponents/httpcore "4.2.2"]
                  [org.apache.httpcomponents/httpclient "4.2.2"]
                  [org.webbitserver/webbit "0.4.3"]
+                 [commons-cli/commons-cli "1.2"]
                  [org.clojure/data.json "0.1.2"]]
   
   :main fourplayserver.main

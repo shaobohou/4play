@@ -15,6 +15,8 @@ public class Bots {
 	
 	static {
 		sBots.put("idiot", new IdiotPlayer());
+                sBots.put("shaobou_random", new RandomPlayer(10000, 10));
+                sBots.put("shaobou_minimax", new MinimaxPlayer(3));                
 	}
 	
 }

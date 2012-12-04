@@ -146,8 +146,8 @@
 	    ws.send(JSON.stringify({message : "start"}))
 	}
 	
-	function registerPlayer(){
-	    ws.send(JSON.stringify({message : "add-player"}))
+	function registerPlayer(type){
+	    ws.send(JSON.stringify({message : {type : "add-player", bot : type}}))
 	}
 	
 	function addPlayer(id, name){
@@ -163,6 +163,16 @@
         	    })
         	})
         }
+	
+	function getBots(){
+	    $("#bots").html("");
+	    
+	    $.getJSON("/bots", function (data){
+        	    $.each(data, function (id){
+			$("#bots").append("<option value=" + data[id] + ">" + data[id] +"</option>");
+        	    })
+            })
+	}
 	
 	function logResult(player1, player2, result, board){
 	    var message = "";
@@ -258,6 +268,7 @@
 	    $("#board").html("");
 	    players = {};
 	    getPlayers();
+	    getBots();
 	    drawEmptyBoard();
 	    getResults();
 	}
@@ -271,6 +282,7 @@
 	    switch(type)
 	    {
 	    case "player-joined":
+		console.log(message);
 		addPlayer(message.id, message.name);
 		break;
 	    case "game-end":
@@ -291,7 +303,10 @@
 		<div id="title">4Play</div>
 		<div id="start" class="button" onclick="start()">Start</div>
 		<div id="reset" class="button" onclick="reset()">Reset</div>
-		<div id="registerPlayer" class="button" onclick="addPlayer()">Add Player</div>
+		<div id="botsDiv"><select id="bots">
+
+		</select></div>
+		<button id="registerPlaer" class="buttn" onclick="registerPlayer($('#bots').val())">Add Bot</button>
 	    </div>
 	    
 	    <div id="results-wrapper"><table id="results"><tbody></tbody></table></div>

@@ -1,12 +1,17 @@
 (ns fourplayserver.tournament
   (:require [cheshire.core :as json]
             [fourplayserver.java-interop :as board]
-            [fourplayserver.models.socket-connections :refer [connections]]))
+            [fourplayserver.models.socket-connections :refer [connections]]
+            [clojure.math.combinatorics :as combo]))
 
 (defn send-socket-message
   [type message]
   (doseq [connection @connections]
     (.send connection (json/generate-string {:type type :message message}))))
+
+(defn games-to-play
+  [players]
+  (shuffle (combo/combinations players 2)))
 
 (defonce tournament (ref {:running false :players {} :results {}}))
 
@@ -57,11 +62,15 @@
   "Attemps to assign a next game for a player. Does nothing if there are no viable opps"
   [player-id]
   (let [last-opp (:last-opp (get (:players @tournament) player-id))
-        waiting-players (remove #(= % last-opp) (get-waiting-players player-id))]
+        last-but-one (or (:last-but-one (get (:players @tournament) player-id)) last-opp)
+        waiting-players (remove #(or (= % last-opp) (= % last-but-one)) (get-waiting-players player-id))]
     (when-not (empty? waiting-players)
       (let [opp-id (first (shuffle waiting-players))]
         (create-game! player-id opp-id)
-          (alter tournament
+        (println last-but-one last-opp opp-id)
+        (alter tournament update-in [:players] (fn [ps] (merge-with merge ps {player-id {:last-but-one last-opp}})))
+        (alter tournament update-in [:players] (fn [ps] (merge-with merge ps {opp-id {:last-but-one (:last-opp (get ps opp-id))}})))
+        (alter tournament
                  (fn [t]
                    (assoc t :players
                           (merge-with merge (:players t)
@@ -125,7 +134,6 @@
                   {:state "DRAW" :board (board/serialize-board (board/flip-board board)) }))
               :else ;in play
               (let [board-inner (if (= (:player2 game) player-id) (board/serialize-board (board/flip-board board)) (board/serialize-board board))]
-                (println board-inner)
                 (if (= (:whosnext game) player-id)
                   {:state "MOVE" :board board-inner}
                   {:state "WAIT" :board board-inner})))))
@@ -166,7 +174,9 @@
       (throw (IllegalArgumentException. "Not enough players"))
       (do 
         (send-socket-message "tournament-started" "")
-        (dosync (alter tournament (fn [t] (assoc t :running true))))))))
+        (dosync (alter tournament (fn [t] (assoc t 
+                                                 :running true
+                                                 :games-to-play (games-to-play (:players t))))))))))
 
 (defn join
   [{name :name}]
@@ -179,6 +189,7 @@
           (alter tournament (fn [t] 
                               (assoc t 
                                      :players (assoc (:players t) player-id {:name name :state :WAIT :last-opp nil
+                                                                             :last-but-one nil
                                                                              :games-played 0 :games-won 0 :games-lost 0
                                                                              :games-drawn 0}))))
           {:id player-id}))
@@ -196,7 +207,6 @@
 
 (defn state
   [args]
-  (println @tournament)
   {:results (:results @tournament)
    :players (:players @tournament)
    :running (:running @tournament)})
