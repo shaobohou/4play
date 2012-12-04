@@ -58,6 +58,7 @@ public class GameLoop {
 		System.out.println("Played:  " + mPlayedCount);
 		System.out.println("Won:     " + mWinCount);
 		System.out.println("Lost:    " + mLoseCount);
+        System.out.println("Draw:    " + mDrawCount);
 	}
 	
 	private void startNewGame() {
