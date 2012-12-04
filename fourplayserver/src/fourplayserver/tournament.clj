@@ -11,7 +11,7 @@
 
 (defn games-to-play
   [players]
-  (shuffle (combo/combinations players 2)))
+  (shuffle (map (partial into #{}) (combo/combinations players 2))))
 
 (defonce tournament (ref {:running false :players {} :results {}}))
 
@@ -61,21 +61,23 @@
 (defn assign-next-game!
   "Attemps to assign a next game for a player. Does nothing if there are no viable opps"
   [player-id]
-  (let [last-opp (:last-opp (get (:players @tournament) player-id))
-        last-but-one (or (:last-but-one (get (:players @tournament) player-id)) last-opp)
-        waiting-players (remove #(or (= % last-opp) (= % last-but-one)) (get-waiting-players player-id))]
-    (when-not (empty? waiting-players)
-      (let [opp-id (first (shuffle waiting-players))]
+  (when (empty? (:games-to-play @tournament))
+    (alter tournament assoc :games-to-play (games-to-play (keys (:players @tournament)))))
+  (let [games-to-play (:games-to-play @tournament)
+        waiting-players (into #{} (map (fn [p] #{player-id p}) (get-waiting-players player-id)))
+        next-game (some waiting-players games-to-play)]
+    (when-not (nil? next-game)
+      (let [opp-id (first (remove #(= % player-id) next-game))]
         (create-game! player-id opp-id)
-        (println last-but-one last-opp opp-id)
-        (alter tournament update-in [:players] (fn [ps] (merge-with merge ps {player-id {:last-but-one last-opp}})))
-        (alter tournament update-in [:players] (fn [ps] (merge-with merge ps {opp-id {:last-but-one (:last-opp (get ps opp-id))}})))
         (alter tournament
                  (fn [t]
-                   (assoc t :players
+                   (assoc t 
+                          :players
                           (merge-with merge (:players t)
-                                      {player-id {:state :PLAYING :last-opp opp-id}
-                                       opp-id {:state :PLAYING :last-opp player-id}}))))))))
+                                      {player-id {:state :PLAYING}
+                                       opp-id {:state :PLAYING}})
+                          :games-to-play
+                          (remove #(= % next-game) games-to-play))))))))
 
 (defn send-socket-end-game
   [game result]
@@ -170,13 +172,13 @@
   [args]
   (if (true? (:running @tournament))
     (throw (IllegalArgumentException. "Tournament has already started!"))
-    (if (< (count (:players @tournament)) 3)
+    (if (< (count (:players @tournament)) 2)
       (throw (IllegalArgumentException. "Not enough players"))
       (do 
         (send-socket-message "tournament-started" "")
         (dosync (alter tournament (fn [t] (assoc t 
                                                  :running true
-                                                 :games-to-play (games-to-play (:players t))))))))))
+                                                 :games-to-play (games-to-play (keys (:players t)))))))))))
 
 (defn join
   [{name :name}]
@@ -189,7 +191,6 @@
           (alter tournament (fn [t] 
                               (assoc t 
                                      :players (assoc (:players t) player-id {:name name :state :WAIT :last-opp nil
-                                                                             :last-but-one nil
                                                                              :games-played 0 :games-won 0 :games-lost 0
                                                                              :games-drawn 0}))))
           {:id player-id}))
@@ -207,6 +208,7 @@
 
 (defn state
   [args]
-  {:results (:results @tournament)
+  {:games-to-play (:games-to-play @tournament)
+   :results (:results @tournament)
    :players (:players @tournament)
    :running (:running @tournament)})
