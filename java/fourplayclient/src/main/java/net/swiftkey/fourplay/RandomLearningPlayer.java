@@ -82,9 +82,10 @@ public class RandomLearningPlayer implements Player {
         newMove = cache.get(b.toString());
         int[] counts = Arrays.copyOf(newMove.mCounts, newMove.mCounts.length);
         double[] scores = Arrays.copyOf(newMove.mScores, newMove.mScores.length);
-        System.out.println(cache.size());
-        System.out.println(Arrays.toString(newMove.mCounts));
-        System.out.println(Arrays.toString(newMove.mScores));
+
+        // System.out.println(cache.size());
+        // System.out.println(Arrays.toString(newMove.mCounts));
+        // System.out.println(Arrays.toString(newMove.mScores));
 
         int best = -1;
         int total = 0;
