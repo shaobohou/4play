@@ -1,7 +1,10 @@
 package net.swiftkey.fourplay;
 
 import java.util.Arrays;
+//import net.swiftkey.fourplay.bots;
 
+import net.swiftkey.fourplay.bots.Bots;
+import net.swiftkey.fourplay.bots.*;
 
 
 public class Main

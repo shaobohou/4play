@@ -1,9 +1,11 @@
 package net.swiftkey.fourplay.bots;
 
-import java.util.ArrayList;
 import java.util.Random;
+import java.util.ArrayList;
+import java.util.Arrays;
 
 import net.swiftkey.fourplay.Board;
+import net.swiftkey.fourplay.bots.Player;
 
 public class RandomPlayer implements Player {
 
