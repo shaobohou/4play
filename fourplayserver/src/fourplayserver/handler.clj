@@ -3,7 +3,10 @@
             [compojure.route :as route]
             [compojure.core :refer :all]
             [fourplayserver.tournament :as tournament]
-            [cheshire.core     :refer [generate-string parse-string]]))
+            [cheshire.core     :refer [generate-string parse-string]])
+  (:import [net.swiftkey.fourplay.bots Bots IdiotPlayer RandomPlayer MinimaxPlayer]))
+
+(def available-bots (keys net.swiftkey.fourplay.bots.Bots/sBots))
 
 (defn wrap-exceptions [app]
   (fn [req] (try (app req)
@@ -22,6 +25,7 @@
     (generate-string (f (-> req :params)))))
 
 (defroutes app-routes
+  (ANY "/bots" [] (to-json (fn [args] available-bots)))
   (context 
     "/tournament" []
     (ANY "/join" [] (to-json tournament/join))
@@ -46,5 +50,9 @@
     (cond
       (= "reset" message)
       (do (println "RESET") (tournament/reset {}))
+      (= "state" message)
+      (do (println "STATE") (tournament/state {}))
       (= "start" message)
-      (do (println "START") (tournament/start {})))))
+      (do (println "START") (tournament/start {}))
+      (= "add-player" (get message "type"))
+      (do (println "ADD PLAYER") (tournament/start-bot (get net.swiftkey.fourplay.bots.Bots/sBots (get message "bot")) (str (get message "bot") (rand-int 10000)))))))

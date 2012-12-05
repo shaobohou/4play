@@ -39,7 +39,9 @@ public class GameState {
 			return State.WIN;
 		} else if (state.equals("LOST")) {
 			return State.LOSE;
-		} else throw new IllegalArgumentException("Unknown state: " + state);
+		} else if (state.equals("DRAW")) {
+                        return State.DRAW;
+                } else throw new IllegalArgumentException("Unknown state: " + state);
 	}
 	
 	public String toString() {

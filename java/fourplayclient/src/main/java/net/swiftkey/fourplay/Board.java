@@ -56,6 +56,25 @@ public class Board
         this.numRows = numRows;
         this.numCols = numCols;
     }
+
+    /**
+     * Construct an empty board of default dimensions.
+     */
+    public static Board empty() {
+        return empty(DEFAULT_ROWS, DEFAULT_COLS);
+    }
+    
+    /**
+     * Construct and return an empty board of given dimensions.
+     */
+    public static Board empty(int numRows, int numCols) {
+        int[] state = new int[numRows * numCols];
+        for(int i = 0; i < state.length; ++i) {
+            state[i] = 0;
+        }
+        
+        return new Board(state, numRows, numCols);
+    }
     
     /**
      * Return the board state as an array of integers.
@@ -354,25 +373,34 @@ public class Board
                 return true;
             }
         }
-        
-        // This is unnecessary, could be much faster!
+
+        // Just checking the "top" tokens, as those are
+        // the only ones that could have been the previous
+        // move
         for (int x = 0; x < this.numCols; ++x) {
-            for (int y = 0; y < this.numRows; ++y) {
-                if ((winningPiece(getDiagonal(x, y, 1, 1), winLength) == player)
-                 || (winningPiece(getDiagonal(x, y, 1, -1), winLength) == player)) {
-                    return true;
+            int y = Math.max(nextRow(x) - 1, 0);
+            if ((winningPiece(getDiagonal(x, y, 1, 1), winLength) == player)
+                    || (winningPiece(getDiagonal(x, y, 1, -1), winLength) == player)) {
+                return true; 
                 }
-            }
         }
         
         return false;
     }
-
+    
+    /**
+     * Invert the board to reflect the opponent's point of view.
+     * Note - returns new instance of Board, this is unmodified.
+     * 
+     * @return New Board instance reflecting opponent's point 
+     *         of view.
+     */
     public Board invert() {
-        int[] newBoardState = (int[]) boardState.clone();
-        for(int i = 0; i < newBoardState.length; ++i) {
-            newBoardState[i] *= -1;
+        int[] state = this.serializeBoard().clone();
+        for(int i = 0; i < state.length; ++i) {
+            state[i] *= -1;
         }
-        return new Board(newBoardState, this.numRows, this.numCols);
+        
+        return new Board(state, this.numRows, this.numCols);
     }
 }

@@ -3,9 +3,135 @@
     <head>
         <script src="jquery-1.7.1.min.js"></script>
 	<script src="jquery.gracefulWebSocket.js"></script>
+	<script src="jquery.quicksand.js"></script>
 	<link rel="stylesheet" type="text/css" href="main.css" />
         <title>4play Tournament Master</title>
         <script>
+	    
+	var rows=8;
+	var cols=8;
+	var height = 400;
+        var width = 400;
+	
+	var putDowns = ["beat", "smashed", "schooled",
+			"destroyed", "whitewashed", "learned",
+			"hammered", "pummeled", "spanked",
+			"trounced", "slaughtered", "pwned",
+			"defeated", "bamboozled", "connect4d",
+			"carted", "laid the smackdown on",
+			"crushed", "flattened", "KO'd",
+			"annihilated", "burned", "checkmated",
+			"yahtzee'd", "wrecked", "walked over",
+			"rinsed", "is more evolved than", "licked",
+			"trashed", ">"]
+	
+	function get(board, r, c) {
+	    if (r < 0 || r >= board.rows ||
+		c < 0 || c >= board.cols) {
+		
+		return undefined;
+	    }
+	    return board.state[r * board.cols + c];
+	}
+	
+	function tops(board) {
+	    var tops = [];
+	    for (var c=0; c<board.cols; c++) {
+		for (r=board.rows-1; r>=0; r--) {
+		    var val = get(board, r, c);
+		    if (val != undefined && val != 0) {
+			tops.push({
+			    row: r,
+			    col: c,
+			    val: val
+			})
+			break;
+		    }
+		}
+	    }
+	    return tops;
+	}
+	
+	function n_connected(board, start_r, start_c, step_r, step_c) {
+	    if (get(board, start_r, start_c) == get(board, start_r + step_r, start_c + step_c)) {
+		return 1 + n_connected(board, start_r + step_r, start_c + step_c, step_r, step_c);
+	    } else {
+		return 1;
+	    }
+	}
+	
+	function find_winning_move(board) {
+	    var step_directions = [[-1, -1], [-1, 0], [-1, 1], [0, -1], [0, 1], [1, -1], [1, 1]];
+	    var candidates = tops(board);
+	    
+	    for (var s=0; s<step_directions.length; s++) {
+		var step_r = step_directions[s][0];
+		var step_c = step_directions[s][1];
+		for (var t=0; t<candidates.length; t++) {
+		    var connected = n_connected(board, candidates[t].row, candidates[t].col, step_r, step_c);
+		    if (connected >= 4) {
+			return {winner: get(board, candidates[t].row, candidates[t].col),
+				connected: connected,
+				direction: [-step_r, -step_c],
+				end: [candidates[t].row,
+				      candidates[t].col],
+				start: [candidates[t].row + (connected - 1) * step_r,
+					candidates[t].col + (connected - 1) * step_c]
+			};
+		    }}}};
+	    
+	function drawEmptyBoard(){
+                var svg = '<svg id="svg" xmlns="http://www.w3.org/2000/svg" version="1.1" height="' + height +'" width="' + width + '">'
+		svg = svg + '<rect width="' + width + '" height="' + height + '" style="fill:rgb(60,60,255);"/>';
+                for(i=0;i<cols;i++){
+                    for(j=0;j<rows;j++){
+                        var cx = ((i * (width / cols)) + ((width / cols) / 2));
+                        var cy = height - ((j * (height / rows)) + ((height / rows) / 2));
+                        svg = svg + '<circle class="circle" id="circle' + (i + (cols * j)) + '" cx="' + cx + '" cy="' + cy + '" r="20" stroke="blue" stroke-width="2" fill="white" />';
+                    }
+                }
+                svg = svg + '</svg>';
+                $("#board").append(svg);
+            }
+            
+            function renderBoardState(board){
+		
+		var state = board.state;
+		var win = (find_winning_move(board));
+		var startx = ((win.start[1] * (width / cols)) + ((width / cols) / 2));
+                var starty = height - ((win.start[0] * (height / rows)) + ((height / rows) / 2));
+		
+		var endx = ((win.end[1] * (width / cols)) + ((width / cols) / 2));
+                var endy = height - ((win.end[0] * (height / rows)) + ((height / rows) / 2));
+		console.log(startx, starty)
+		$("#svg line").remove();
+		
+		var line = document.createElementNS("http://www.w3.org/2000/svg", "line");
+		 line.setAttributeNS(null, "x1", startx);
+		 line.setAttributeNS(null, "y1", starty);
+		 line.setAttributeNS(null, "x2",  endx);
+		 line.setAttributeNS(null, "y2", endy);
+		 line.setAttributeNS(null, "style", "stroke:10");
+    
+		$("#svg").append(line);
+
+		//$("#svg").append("<line x1='" + startx + "' y1='" + starty +"' x2='" + endx + "' y2='" + endy + "' style='stroke: rgb(60%, 20%, 60%); stroke-width: 5;'/>");
+		
+		
+                $(".circle").attr("fill", "white");
+                for(i=0;i<state.length;i++){
+                    if(state[i] == 1){
+                        $("#circle" + i).attr("fill", "#f22");
+                    }else if(state[i] == -1){
+                        $("#circle" + i).attr("fill", "#fd2");
+                    }
+                }
+		
+
+		
+		
+		
+            }
 	    
 	var ws = $.gracefulWebSocket("ws://127.0.0.1:8080/websocket");
 	
@@ -20,9 +146,13 @@
 	    ws.send(JSON.stringify({message : "start"}))
 	}
 	
+	function registerPlayer(type){
+	    ws.send(JSON.stringify({message : {type : "add-player", bot : type}}))
+	}
+	
 	function addPlayer(id, name){
 	    players[id] = name;
-	    $("#players").append("<li style='display:none' id=player" + id + ">" + name + "</li>");
+	    $("#players").append("<li class='player" + id + "' style='display:none' id=player" + id + ">" + name + "</li>");
 	    $("#player" + id).fadeIn("slow");
 	}
 	
@@ -34,32 +164,113 @@
         	})
         }
 	
-	var results = 0;
+	function getBots(){
+	    $("#bots").html("");
+	    
+	    $.getJSON("/bots", function (data){
+        	    $.each(data, function (id){
+			$("#bots").append("<option value=" + data[id] + ">" + data[id] +"</option>");
+        	    })
+            })
+	}
 	
 	function logResult(player1, player2, result, board){
 	    var message = "";
 	    
+	    var putDown = putDowns[Math.floor(Math.random()*putDowns.length)]
+	    
+	    var player1elem = "<td class='player" + player1 + "'>" + players[player1] + "</td>";
+	    var player2elem = "<td class='player" + player2 + "'>" + players[player2] + "</td>";
+	    
 	    switch(result)
 	    {
 		case 0:
-		    message = player1 + " drew with " + player2;
+		    message = player1elem + "<td>drew with</td>" + player2elem;
+		    break;
 		case 1:
-		    message = player1 + " beat " + player2;
+		    message = player1elem + "<td class='putdown'>" + putDown + "</td>" + player2elem;
+		    break;
 		case -1:
-		    message = player2 + " beat " + player1;
+		    message = player2elem + "<td class='putdown'>" + putDown + "</td>" + player1elem;
+		    break;
 		
 	    }
 	    
-	    $("#results").prepend("<li style='display:none' id=results" + results + ">" + message + "</li>");
-	    $("#results" + results).fadeIn("slow");
-	    results++;
+	    $("#results").prepend(
+		$('<tr>')
+		    .hide()
+		    .html(message)
+		    .fadeIn('slow')
+		    .click(function() {
+			var t = $('<div/>')
+				    .css('font-size', '300px')
+				    .css('top', '200px')
+				    .css('position', 'fixed')
+				    .css('-webkit-transform', 'rotate(-45deg)')
+				    .text(putDown);
+				    
+			$('body')
+			    .append(t);
+			    
+			t.fadeOut('slow', function() {
+			    $(this).remove();
+			});
+		    })
+	    );
+	    
+	    $("#results tr").slice(20).remove();
+	    
+	    renderBoardState(board);
+	}
+	
+	function SortByScore(a, b){
+	    return ((a.score < b.score) ? 1 : ((a.score > b.score) ? -1 : 0));
+	}
+	
+	function renderLeaderBoard(playersInfo){
+	    var playerStates = [];
+	    $("#leaderBoardTBody").html("");
+	    $.each(playersInfo, function(id){
+		var playerState = playersInfo[id];
+		playerState.id = id;
+		playerState.score = playersInfo[id]["games-won"]/playersInfo[id]["games-played"];
+		playerStates.push(playerState);
+	    })
+	    
+	    playerStates = playerStates.sort(SortByScore);
+	    
+	    $.each(playerStates, function (id){
+		var playerState = playerStates[id];
+		var t = $('<tr/>')
+		
+		$("#leaderBoardTBody").append(t);
+		
+		
+		t.append($('<td/>').html(playerState["name"]).attr("class", "player" + playerState.id));
+		t.append($('<td/>').html(playerState["games-played"]));
+		t.append($('<td/>').html(playerState["games-won"]));
+		t.append($('<td/>').html(playerState["games-lost"]));
+		t.append($('<td/>').html(playerState["games-drawn"]));
+		t.append($('<td/>').html(Math.round (playerState["score"] * 1000) / 1000));
+		
+	    });
+	}
+	
+	function getResults(){
+	    $.getJSON("/tournament/state", function (data){
+        	    renderLeaderBoard(data.players);
+        	})
 	}
 	
 	function getTournamentState(){
-	    $("#players").html("<li>Players</li>");
+	    $("#players").html("");
 	    $("#results").html("");
+	    $("#board").html("");
 	    players = {};
 	    getPlayers();
+	    getBots();
+	    drawEmptyBoard();
+	    getResults();
 	}
 	
 	
@@ -71,10 +282,14 @@
 	    switch(type)
 	    {
 	    case "player-joined":
+		console.log(message);
 		addPlayer(message.id, message.name);
 		break;
 	    case "game-end":
-		logResult(players[message.player1], players[message.player2], message.result, message.board);
+		logResult(message.player1, message.player2, message.result, message.board);
+		break;
+	    case "state":
+		renderLeaderBoard(message);
 		break;
 	    }
 	};
@@ -88,13 +303,34 @@
 		<div id="title">4Play</div>
 		<div id="start" class="button" onclick="start()">Start</div>
 		<div id="reset" class="button" onclick="reset()">Reset</div>
+		<div id="botsDiv"><select id="bots">
+
+		</select></div>
+		<button id="registerPlaer" class="buttn" onclick="registerPlayer($('#bots').val())">Add Bot</button>
 	    </div>
 	    
-	    <div id="results-wrapper"><ul id="results"></ul></div>
+	    <div id="results-wrapper"><table id="results"><tbody></tbody></table></div>
+	    <div id="board"></div>
+	    <div id="leaderBoard">
+		<table>
+		    <thead>
+			<tr>
+			    <th>Name</th>
+			    <th>Played</th>
+			    <th>W</th>
+			    <th>L</th>
+			    <th>D</th>
+			    <th>Score</th>
+			</tr>
+		    </thead>
+		    <tbody id="leaderBoardTBody">
+			
+		    </tbody>
+		</table>
+	    </div>
 	</div>
         <div class="nav">
 	    <ul id="players">
-		<li>Players</li>
 	    </ul>
 	</div>
     </div>

@@ -5,6 +5,7 @@ body{
 #controlBar{
   border-bottom:1px solid black;
   padding-bottom: 10px;
+  text-align: right;
 }
 
 .wrapper {
@@ -21,7 +22,6 @@ body{
   height:100%;
 }
 .content {
-  text-align: right;
   border:1px solid;
   border-radius: 10px;
   margin-left: 220px;
@@ -46,17 +46,11 @@ body{
     padding-left: 0px;
 }
 
-.nav > ul > li:first-child {
-     background-color: lightsalmon;
-}
-
 .nav > ul > li {
-     background-color: lightsteelblue;
      padding:10px;
      margin: 5px;
      border-radius: 10px;
      text-align: center;
-     color: darkslategrey;
 }
 .nav > ul > li a:link, .nav > ul > li a:visited {
     display: block;
@@ -64,30 +58,28 @@ body{
 }
 
 #results-wrapper{
-  overflow-y:hidden;
-  width:800px;
+  overflow:hidden;
+  width:500px;
   height:400px;
   margin:20px;
+  display:inline-block;
 }
 
-#results-wrapper > ul{
-  list-style-type:none;
-  padding-left: 0px;
+#results-wrapper > table {
+    width: 100%;
+    border-collapse: collapse;
 }
 
-#results-wrapper > ul > li {
-     background-color: white;
-     padding:10px;
-     margin: 5px;
-     border-radius: 10px;
-     text-align: left;
-     color: darkslategrey;
-     border: 1px solid black;
-     width:200px;
+#results-wrapper tr {
+    border-bottom: 1px solid white;
 }
-#results-wrapper > ul > li a:link, .nav > ul > li a:visited {
-    display: block;
-    color:white;
+
+#results-wrapper td {
+    padding:0.6em;
+}
+
+#results-wrapper .putdown {
+    text-align: center;
 }
 
 .button{
@@ -108,3 +100,53 @@ body{
 #reset{
   background-color:burlyWood;
 }
+
+#board{
+    display:inline-block;
+}
+
+#board > svg {
+    border: 2px solid blue;
+    border-bottom: 8px solid darkBlue;
+    border-radius: 2px;
+}
+
+.hidden{
+    display:none;
+}
+
+#leaderBoard{
+    display: inline-block;
+    width:300px;
+    height:400px;
+    position:absolute;
+    margin-top: 10px;
+    margin-left:30px;
+}
+
+#leaderBoard > ul{
+    padding-left: 0px;
+    list-style-type:none;
+}
+
+#leaderBoard td {
+    margin:5px;
+    padding:0.5em;
+}
+
+#botsDiv{
+    display:inline-block;
+}
+
+.player1 { background-color: #3D0000; color: white;}
+.player2 { background-color: #DC0100; color: white;}
+.player3 { background-color: #FF6C00; color: white;}
+.player4 { background-color: #FFDA8E; color: black;}
+.player5 { background-color: #949EA5; color: black;}
+.player6 { background-color: #EFDE6B; color: black;}
+.player7 { background-color: #9CD6CF; color: black;}
+.player8 { background-color: #839492; color: black;}
+.player9 { background-color: #A0417B; color: black;}
+.player10 { background-color: #9CA440; color: black;}
+.player11 { background-color: #BC8F74; color:black;}
+

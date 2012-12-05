@@ -18,6 +18,9 @@ public class Main
     private static Player mPlayer;
     private static Player iPlayer = new IdiotPlayer();
     private static Player rPlayer = new RandomPlayer(10000, 10);
+    private static Player brPlayer = new BetterRandomPlayer(500, 32);
+    private static Player rlPlayer = new RandomLearningPlayer(10000, 32);
+    private static Player brlPlayer = new BetterRandomLearningPlayer(200, 32);
     private static Player mmPlayer1 = new MinimaxPlayer(1);
     private static Player mmPlayer2 = new MinimaxPlayer(2);
     private static Player mmPlayer3 = new MinimaxPlayer(3);
@@ -47,13 +50,15 @@ public class Main
             System.out.println("Exception in the main testing code!");
         }
 
-        System.out.println(mmPlayer3.move(tempBoard));
+        System.out.println(rPlayer.move(tempBoard));
+        System.out.println(brPlayer.move(tempBoard));
+        System.out.println(brlPlayer.move(tempBoard));
         // System.exit(1);
 
         int[] scores = {0, 0, 0};
         try {
             for(int i = 0; i < 100; ++i) {
-                switch (deathMatch(tempBoard, mmPlayer1, mmPlayer2)) {
+                switch (deathMatch(tempBoard, rPlayer, brlPlayer)) {
                 case -1: ++scores[0]; break;
                 case  0: ++scores[1]; break;
                 case  1: ++scores[2]; break;
