@@ -4,8 +4,7 @@
             [compojure.core :refer :all]
             [fourplayserver.tournament :as tournament]
             [cheshire.core     :refer [generate-string parse-string]])
-  (:import [net.swiftkey.fourplay GameLoop ServiceStub]
-           [net.swiftkey.fourplay.bots Bots IdiotPlayer RandomPlayer MinimaxPlayer]))
+  (:import [net.swiftkey.fourplay.bots Bots IdiotPlayer RandomPlayer MinimaxPlayer]))
 
 (def available-bots (keys net.swiftkey.fourplay.bots.Bots/sBots))
 
@@ -45,11 +44,6 @@
            wrap-exceptions
            wrap-headers))
 
-(defn start-bot
-  [bot bot-name]
-  (let [game (GameLoop. (ServiceStub. "localhost" 3000) bot bot-name)]
-    (future (.play game 1000000))))
-
 (defn on-socket-message [connection json-message]
   (println json-message)
   (let [message (get (parse-string json-message) "message")]
@@ -61,4 +55,4 @@
       (= "start" message)
       (do (println "START") (tournament/start {}))
       (= "add-player" (get message "type"))
-      (do (println "ADD PLAYER") (start-bot (get net.swiftkey.fourplay.bots.Bots/sBots (get message "bot")) (str (get message "bot") (rand-int 10000)))))))
+      (do (println "ADD PLAYER") (tournament/start-bot (get net.swiftkey.fourplay.bots.Bots/sBots (get message "bot")) (str (get message "bot") (rand-int 10000)))))))

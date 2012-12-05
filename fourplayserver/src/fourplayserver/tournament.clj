@@ -2,7 +2,15 @@
   (:require [cheshire.core :as json]
             [fourplayserver.java-interop :as board]
             [fourplayserver.models.socket-connections :refer [connections]]
-            [clojure.math.combinatorics :as combo]))
+            [clojure.math.combinatorics :as combo])
+  (:import [net.swiftkey.fourplay GameLoop ServiceStub]))
+
+(def bots (atom []))
+
+(defn start-bot
+  [bot bot-name]
+  (let [game (GameLoop. (ServiceStub. "localhost" 3000) bot bot-name)]
+    (swap! bots conj (future (.play game 1000000)))))
 
 (defn send-socket-message
   [type message]
@@ -139,7 +147,9 @@
                 (if (= (:whosnext game) player-id)
                   {:state "MOVE" :board board-inner}
                   {:state "WAIT" :board board-inner})))))
-        {:state "WAIT" :board {:rows board/rows :cols board/cols}}))))
+        (if (:just-reset @tournament)
+          (do (println "DIE") {:state "DIE!!!" :board {:rows board/rows :cols board/cols}})
+          {:state "WAIT" :board {:rows board/rows :cols board/cols}})))))
   
 (defn update-game!
   [game new-board]
@@ -186,6 +196,7 @@
     (throw (IllegalArgumentException. "Tournament has already started!"))
     (if name
       (dosync
+        (alter tournament dissoc :just-reset)
         (let [player-id (inc (count (get @tournament :players)))]
           (send-socket-message "player-joined" {:id player-id :name name})
           (alter tournament (fn [t] 
@@ -200,7 +211,13 @@
   "Resets the tournament to its base state"
   [args]
   (dosync
-    (ref-set tournament {:running false :players {} :results {}})))
+    (ref-set games {})
+    (ref-set game-ids {})
+    (ref-set tournament {:running false :players {} :results {}
+                         :just-reset true}))
+  (doseq [bot @bots]
+    (future-cancel bot))
+  (reset! bots []))
 
 (defn players
   [args]
@@ -208,7 +225,8 @@
 
 (defn state
   [args]
-  {:games-to-play (:games-to-play @tournament)
+  {:bots (count @bots)
+   :games-to-play (:games-to-play @tournament)
    :results (:results @tournament)
    :players (:players @tournament)
    :running (:running @tournament)})
