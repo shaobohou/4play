@@ -40,7 +40,7 @@ public class RandomLearningPlayer implements Player {
         mSamples = samples;
         mDepth = depth;
     }
-    
+
     @Override
     public int move(Board b) {
         double startTime = System.currentTimeMillis();
@@ -107,7 +107,7 @@ public class RandomLearningPlayer implements Player {
         if(best>=0) {
             return best;
         }
-        
+
         return idiotMove(b);
     }
 

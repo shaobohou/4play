@@ -1,15 +1,15 @@
 package net.swiftkey.fourplay.bots;
 
-import java.util.Random;
 import java.util.ArrayList;
-import java.util.Map;
 import java.util.HashMap;
-import java.util.Arrays;
+import java.util.Map;
+import java.util.Random;
 
 import net.swiftkey.fourplay.Board;
 
 public class MinimaxPlayer implements Player {
 
+    Player mIdiot = new IdiotPlayer();
     Random mRandom = new Random();
     int mDepth = 3;
 
@@ -64,17 +64,9 @@ public class MinimaxPlayer implements Player {
             System.out.println("Exception!");
         }
 
-        return idiotMove(b);
+        return mIdiot.move(b);
     }
 
-    public int idiotMove(Board b) {
-        int move = mRandom.nextInt(b.countCols());
-        while(b.nextRow(move)<0) {
-            move = mRandom.nextInt(b.countCols());
-        }
-
-        return move;
-    }
 
     int search(Board b, int depth, Map<String, Integer> cache) throws Exception {
         if(depth<=0) {

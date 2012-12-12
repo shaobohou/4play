@@ -17,7 +17,7 @@ public class BetterRandomPlayer implements Player {
         mSamples = samples;
         mDepth = depth;
     }
-    
+
     @Override
     public int move(Board b) {
         double startTime = System.currentTimeMillis();
@@ -69,7 +69,7 @@ public class BetterRandomPlayer implements Player {
         if(best>=0) {
             return best;
         }
-        
+
         return mTrainer.move(b);
     }
 
