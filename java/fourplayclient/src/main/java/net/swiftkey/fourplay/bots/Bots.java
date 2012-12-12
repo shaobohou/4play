@@ -16,7 +16,11 @@ public class Bots {
 	static {
 		sBots.put("idiot", new IdiotPlayer());
                 sBots.put("shaobou_random", new RandomPlayer(10000, 10));
-                sBots.put("shaobou_minimax", new MinimaxPlayer(3));                
-	}
+                sBots.put("shaobou_minimax", new MinimaxPlayer(3));  
+                sBots.put("shaobo_betterrandom", new BetterRandomLearningPlayer(200, 32));              
+                sBots.put("checkall", new GroupBCheckAllPlayer(2));
+        sBots.put("checkall3", new GroupBCheckAllPlayer(3));	
+ sBots.put("group_a", new GroupABot());
+       }
 	
 }
